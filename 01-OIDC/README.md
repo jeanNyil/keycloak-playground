@@ -6,6 +6,7 @@
 
 2. Run the OIDC playground application:
     ```shell
+    cd 01-OIDC
     npm install
     npm start
     ```

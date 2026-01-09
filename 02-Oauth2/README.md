@@ -6,14 +6,14 @@
 
 2. Start the frontend part in one terminal:
     ```shell
-    cd frontend
+    cd 02-Oauth2/frontend
     npm install
     npm start
     ```
 
 2.  Start the backend part in the other terminal:
     ```shell
-    cd backend
+    cd 02-Oauth2/backend
     npm install
     npm start
     ```
