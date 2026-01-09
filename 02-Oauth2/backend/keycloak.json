@@ -1,0 +1,12 @@
+{
+  "realm": "demo",
+  "auth-server-url": "${env.KC_URL:https://sso.apps.ocp4.jnyilimb.eu/}",
+  "ssl-required": "all",
+  "resource": "oauth-backend",
+  "verify-token-audience": true,
+  "credentials": {
+    "secret": "${env.CLIENT_SECRET:q56y5QG1Rblawu6208XUe3viztdWgzQf}"
+  },
+  "use-resource-role-mappings": true,
+  "confidential-port": 0
+}

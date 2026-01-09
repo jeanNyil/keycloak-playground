@@ -1,0 +1,15 @@
+.idea
+*.iml
+gradle
+
+# Visual Studio Code
+.vscode
+.factorypath
+
+# OSX
+.DS_Store
+
+package-lock.json
+node_modules
+node
+target
