@@ -32,21 +32,16 @@
     "client.secret.creation.time": "1767863056",
     "backchannel.logout.session.required": "true",
     "standard.token.exchange.enabled": "false",
+    "frontchannel.logout.session.required": "true",
+    "display.on.consent.screen": "false",
     "oauth2.device.authorization.grant.enabled": "false",
     "backchannel.logout.revoke.offline.tokens": "false",
-    "dpop.bound.access.tokens": "false",
-    "pkce.code.challenge.method": "",
-    "login_theme": "",
-    "display.on.consent.screen": "false",
-    "consent.screen.text": "",
-    "frontchannel.logout.url": "",
-    "frontchannel.logout.session.required": "true"
+    "dpop.bound.access.tokens": "false"
   },
   "authenticationFlowBindingOverrides": {},
   "fullScopeAllowed": true,
   "nodeReRegistrationTimeout": -1,
   "defaultClientScopes": [
-    "service_account",
     "web-origins",
     "acr",
     "roles",
@@ -65,6 +60,5 @@
     "view": true,
     "configure": true,
     "manage": true
-  },
-  "authorizationServicesEnabled": false
+  }
 }
