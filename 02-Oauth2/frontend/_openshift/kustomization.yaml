@@ -8,3 +8,4 @@ resources:
 
 commonLabels:
   app.kubernetes.io/part-of: rhbk-playground
+  app.kubernetes.io/version: "1.0.0"
