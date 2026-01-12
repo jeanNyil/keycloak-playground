@@ -2,12 +2,18 @@ var express = require('express');
 var app = express();
 var stringReplace = require('string-replace-middleware');
 
-var KC_URL = process.env.KC_URL || "https://sso.apps.ocp4.jnyilimb.eu/auth";
+var KC_URL = process.env.KC_URL || "http://localhost:8080/";
 var SERVICE_URL = process.env.SERVICE_URL || "http://localhost:3000/secured";
+var INPUT_ISSUER = process.env.INPUT_ISSUER || "http://localhost:8080/realms/demo";
+
+console.log('env KC_URL:', KC_URL);
+console.log('env SERVICE_URL:', SERVICE_URL);
+console.log('env INPUT_ISSUER:', INPUT_ISSUER);
 
 app.use(stringReplace({
    'SERVICE_URL': SERVICE_URL,
-   'KC_URL': KC_URL
+   'KC_URL': KC_URL,
+   'INPUT_ISSUER': INPUT_ISSUER
 }));
 app.use(express.static('.'))
 
@@ -15,5 +21,6 @@ app.get('/', function(req, res) {
     res.render('index.html');
 });
 
-
-app.listen(8000);
+app.listen(8000, function () {
+    console.log('Started OIDC Playground on port 8000');
+});
