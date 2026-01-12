@@ -2,7 +2,15 @@
 
 ## Instructions to run locally
 
-1. Open a terminal
+1. Open a terminal and optionally set the following environment variables according to your Keycloak environment:
+    - **`KC_URL`**: Keycloak server root URL.
+    - **`INPUT_ISSUER`**: Keycloak server realm URL that issues OIDC tokens. This can also be updated on the OpenID Connect Playground frontend UI.
+    - **`OTEL_EXPORTER_OTLP_ENDPOINT`**: OpenTelemetry Collector gRPC endpoint for distributed tracing (optional).
+    ```shell
+    export KC_URL=<YOUR_KEYCLOAK_SERVER_ROOT_URL> # Default: http://localhost:8080/
+    export INPUT_ISSUER=<YOUR_KEYCLOAK_ISSUER_REALM_URL> # Default: http://localhost:8080/realms/demo
+    export OTEL_EXPORTER_OTLP_ENDPOINT=<YOUR_OTEL_COLLECTOR_GRPC_ENDPOINT> # Default: http://localhost:4317
+    ```
 
 2. Run the OIDC playground application:
     ```shell

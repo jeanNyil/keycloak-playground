@@ -2,3 +2,109 @@
 
 - [OpenID Connect Playground](./01-OIDC/README.md)
 - [OAuth 2 Playground](./02-Oauth2/README.md)
+
+---
+
+## Build and Push Container Images
+
+```bash
+# Login to Quay.io
+podman login quay.io
+
+# OIDC Playground
+cd 01-OIDC
+podman build -t quay.io/jnyilimbibi/oidc-playground:1.0.0 .
+podman push quay.io/jnyilimbibi/oidc-playground:1.0.0
+
+# OAuth Frontend
+cd ../02-Oauth2/frontend
+podman build -t quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0 .
+podman push quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0
+
+# OAuth Backend
+cd ../backend
+podman build -t quay.io/jnyilimbibi/oauth-playground-backend:1.0.0 .
+podman push quay.io/jnyilimbibi/oauth-playground-backend:1.0.0
+```
+
+---
+
+## Deploy to OpenShift
+
+```bash
+# Login to OpenShift
+oc login <your-cluster-url>
+
+# Create or switch to your project
+oc project <your-project>
+
+# Deploy OIDC Playground
+oc apply -k 01-OIDC/_openshift/
+
+# Deploy OAuth Backend (deploy first - frontend depends on its route)
+oc apply -k 02-Oauth2/backend/_openshift/
+
+# Deploy OAuth Frontend
+oc apply -k 02-Oauth2/frontend/_openshift/
+```
+
+---
+
+## Post-Deployment Configuration
+
+Update environment variables to match your environment:
+
+```bash
+# Get the backend route URL
+BACKEND_ROUTE=$(oc get route oauth-playground-backend -o jsonpath='https://{.spec.host}')
+
+# Update OIDC Playground
+oc set env deployment/oidc-playground \
+  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
+  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+
+# Update OAuth Frontend
+oc set env deployment/oauth-playground-frontend \
+  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
+  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+  SERVICE_URL="${BACKEND_ROUTE}/secured" \
+  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+
+# Update OAuth Backend
+oc set env deployment/oauth-playground-backend \
+  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
+  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+```
+
+---
+
+## Verify Deployment
+
+```bash
+# Check deployments
+oc get deployments
+
+# Check pods
+oc get pods
+
+# Get route URLs
+oc get routes
+
+# View logs
+oc logs -f deployment/oidc-playground
+oc logs -f deployment/oauth-playground-frontend
+oc logs -f deployment/oauth-playground-backend
+```
+
+---
+
+## Access Applications
+
+Get your application URLs:
+
+```bash
+echo "OIDC Playground: https://$(oc get route oidc-playground -o jsonpath='{.spec.host}')"
+echo "OAuth Frontend:  https://$(oc get route oauth-playground-frontend -o jsonpath='{.spec.host}')"
+echo "OAuth Backend:   https://$(oc get route oauth-playground-backend -o jsonpath='{.spec.host}')"
+```
