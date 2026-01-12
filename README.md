@@ -52,7 +52,7 @@ oc apply -k 02-Oauth2/frontend/_openshift/
 
 ## Post-Deployment Configuration
 
-Update environment variables to match your environment:
+Update environment variables and ConfigMap to match your environment:
 
 ```bash
 # Get the backend route URL
@@ -71,9 +71,16 @@ oc set env deployment/oauth-playground-frontend \
   SERVICE_URL="${BACKEND_ROUTE}/secured" \
   OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
 
-# Update OAuth Backend
+# Update OAuth Backend ConfigMap first (keycloak.json)
+oc patch configmap oauth-playground-backend-config --type merge -p '
+{
+  "data": {
+    "keycloak.json": "{\n  \"realm\": \"demo\",\n  \"auth-server-url\": \"https://sso.apps.ocp4.jnyilimb.eu/\",\n  \"ssl-required\": \"all\",\n  \"resource\": \"oauth-backend\",\n  \"verify-token-audience\": true,\n  \"credentials\": {},\n  \"use-resource-role-mappings\": true,\n  \"confidential-port\": 0\n}"
+  }
+}'
+
+# Update OAuth Backend (triggers rollout, picks up updated ConfigMap)
 oc set env deployment/oauth-playground-backend \
-  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
   OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
 ```
 
