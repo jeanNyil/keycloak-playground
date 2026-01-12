@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oauth-playground-frontend
+  labels:
+    app: oauth-playground-frontend
+    app.kubernetes.io/name: oauth-playground-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: rhbk-playground
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oauth-playground-frontend
+  template:
+    metadata:
+      labels:
+        app: oauth-playground-frontend
+        app.kubernetes.io/name: oauth-playground-frontend
+    spec:
+      containers:
+        - name: oauth-playground-frontend
+          image: quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: KC_URL
+              # UPDATE: Set to your Keycloak server URL
+              value: "https://sso.apps.example.com/"
+            - name: INPUT_ISSUER
+              # UPDATE: Set to your Keycloak realm URL
+              value: "https://sso.apps.example.com/realms/demo"
+            - name: SERVICE_URL
+              # UPDATE: Set to the external route URL of the backend (browser needs external access)
+              # Get with: oc get route oauth-playground-backend -o jsonpath='{.spec.host}'
+              value: "https://oauth-playground-backend-<namespace>.apps.<cluster>/secured"
+            - name: OTEL_SERVICE_NAME
+              value: "oauth-playground-frontend"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              # UPDATE: Set to your OpenTelemetry Collector endpoint
+              value: "http://otel-collector:4317"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5

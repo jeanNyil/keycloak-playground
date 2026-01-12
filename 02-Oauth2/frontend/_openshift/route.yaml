@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: oauth-playground-frontend
+  labels:
+    app: oauth-playground-frontend
+    app.kubernetes.io/name: oauth-playground-frontend
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: rhbk-playground
+spec:
+  to:
+    kind: Service
+    name: oauth-playground-frontend
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
