@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/nodejs-22:1-75
+FROM registry.access.redhat.com/ubi10/nodejs-22:10.1
 
 # Labels for OpenShift and container metadata
 LABEL name="oauth-playground-backend" \
