@@ -22,6 +22,7 @@ spec:
       containers:
         - name: oauth-playground-frontend
           image: quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
               protocol: TCP
