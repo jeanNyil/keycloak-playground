@@ -11,7 +11,7 @@ data:
   keycloak.json: |
     {
       "realm": "demo",
-      "auth-server-url": "${env.KC_URL:https://sso.apps.example.com/}",
+      "auth-server-url": "https://sso.apps.example.com/",
       "ssl-required": "all",
       "resource": "oauth-backend",
       "verify-token-audience": true,

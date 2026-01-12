@@ -27,9 +27,6 @@ spec:
             - containerPort: 3000
               protocol: TCP
           env:
-            - name: KC_URL
-              # UPDATE: Set to your Keycloak server URL
-              value: "https://sso.apps.example.com/"
             - name: OTEL_SERVICE_NAME
               value: "oauth-playground-backend"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
