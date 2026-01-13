@@ -2,7 +2,7 @@
 /* OpenID Connect functions */
 /****************************/
 
-// Load the OpenID Provider Configuration
+// Load the OpenID Provider Configuration (via proxy for distributed tracing)
 function loadDiscovery() {
     var issuer = getInput('input-issuer');
     setState('issuer', issuer);
@@ -14,7 +14,8 @@ function loadDiscovery() {
             setOutput('output-discovery', state.discovery);
         }
     }
-    req.open('GET', issuer + '/.well-known/openid-configuration', true);
+    // Use proxy endpoint for distributed tracing
+    req.open('GET', '/api/keycloak/discovery?issuer=' + encodeURIComponent(issuer), true);
     req.send();
 }
 
@@ -59,15 +60,19 @@ function generateAuthenticationRequest() {
     }
 }
 
-// Create a Token Exchange Request
+// Create a Token Exchange Request (via proxy for distributed tracing)
 function loadTokens() {
     var code = getInput('input-code');
     var clientId = getInput('input-clientid');
 
-    var params = 'grant_type=authorization_code';
-    params += '&code=' + code;
-    params += '&client_id=' + clientId;
-    params += '&redirect_uri=' + document.location.href.split('?')[0];
+    // Use proxy endpoint for distributed tracing
+    var proxyParams = {
+        token_endpoint: state.discovery['token_endpoint'],
+        grant_type: 'authorization_code',
+        code: code,
+        client_id: clientId,
+        redirect_uri: document.location.href.split('?')[0]
+    };
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
@@ -91,25 +96,31 @@ function loadTokens() {
             }
         }
     }
-    req.open('POST', state.discovery['token_endpoint'], true);
-    req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    req.open('POST', '/api/keycloak/token', true);
+    req.setRequestHeader('Content-type', 'application/json');
 
-    setOutput('output-tokenRequest', state.discovery['token_endpoint'] + '<br/><br/>' + params.replaceAll('&', '<br/>'));
+    setOutput('output-tokenRequest', state.discovery['token_endpoint'] + '<br/><br/>' + 
+        'grant_type=authorization_code<br/>code=' + code + '<br/>client_id=' + clientId + 
+        '<br/>redirect_uri=' + document.location.href.split('?')[0]);
 
-    req.send(params);
+    req.send(JSON.stringify(proxyParams));
 
     window.history.pushState({}, document.title, '/');
 }
 
-// Create a Refresh Token Request
+// Create a Refresh Token Request (via proxy for distributed tracing)
 function refreshTokens() {
     var code = getInput('input-code');
     var clientId = getInput('input-clientid');
 
-    var params = 'grant_type=refresh_token';
-    params += '&refresh_token=' + state.refreshToken;
-    params += '&client_id=' + clientId;
-    params += '&scope=openid';
+    // Use proxy endpoint for distributed tracing
+    var proxyParams = {
+        token_endpoint: state.discovery['token_endpoint'],
+        grant_type: 'refresh_token',
+        refresh_token: state.refreshToken,
+        client_id: clientId,
+        scope: 'openid'
+    };
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
@@ -126,17 +137,19 @@ function refreshTokens() {
             }
         }
     }
-    req.open('POST', state.discovery['token_endpoint'], true);
-    req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    req.open('POST', '/api/keycloak/token', true);
+    req.setRequestHeader('Content-type', 'application/json');
 
-    setOutput('output-refreshRequest', state.discovery['token_endpoint'] + '<br/><br/>' + params.replaceAll('&', '<br/>'));
+    setOutput('output-refreshRequest', state.discovery['token_endpoint'] + '<br/><br/>' + 
+        'grant_type=refresh_token<br/>refresh_token=' + state.refreshToken + 
+        '<br/>client_id=' + clientId + '<br/>scope=openid');
 
-    req.send(params);
+    req.send(JSON.stringify(proxyParams));
 
     window.history.pushState({}, document.title, '/');
 }
 
-// Create a UserInfo Request
+// Create a UserInfo Request (via proxy for distributed tracing)
 function userInfo() {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
@@ -145,7 +158,9 @@ function userInfo() {
             setOutput('output-userInfoResponse', req.responseText);
         }
     }
-    req.open('GET', state.discovery['userinfo_endpoint'], true);
+    // Use proxy endpoint for distributed tracing
+    var proxyUrl = '/api/keycloak/userinfo?endpoint=' + encodeURIComponent(state.discovery['userinfo_endpoint']);
+    req.open('GET', proxyUrl, true);
     req.setRequestHeader('Authorization', 'Bearer ' + state.accessToken);
 
     setOutput('output-userInfoRequest', state.discovery['userinfo_endpoint'] + '<br/><br/>' + 'Authorization: Bearer ' + state.accessToken);
