@@ -34,9 +34,8 @@ spec:
               # UPDATE: Set to your Keycloak realm URL
               value: "https://sso.apps.example.com/realms/demo"
             - name: SERVICE_URL
-              # UPDATE: Set to the external route URL of the backend (browser needs external access)
-              # Get with: oc get route oauth-playground-backend -o jsonpath='{.spec.host}'
-              value: "https://oauth-playground-backend-<namespace>.apps.<cluster>/secured"
+              # Internal Kubernetes service URL (proxy makes server-to-server calls)
+              value: "http://oauth-playground-backend:3000/secured"
             - name: OTEL_SERVICE_NAME
               value: "oauth-playground-frontend"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
