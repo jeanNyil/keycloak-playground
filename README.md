@@ -111,3 +111,166 @@ echo "OIDC Playground: https://$(oc get route oidc-playground -o jsonpath='{.spe
 echo "OAuth Frontend:  https://$(oc get route oauth-playground-frontend -o jsonpath='{.spec.host}')"
 # Note: OAuth Backend has no external route - accessed via frontend proxy
 ```
+
+---
+
+## OpenTelemetry Instrumentation
+
+Both playground applications are instrumented with OpenTelemetry for distributed tracing. The instrumentation uses:
+
+- **OTLP/gRPC exporter** to send traces to an OpenTelemetry Collector
+- **W3C Trace Context propagation** for correlating traces across services
+- **Auto-instrumentation** for Express and HTTP modules
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector endpoint (gRPC) | `http://localhost:4317` |
+| `OTEL_SERVICE_NAME` | Service name in traces | App-specific default |
+| `OTEL_SERVICE_VERSION` | Service version | `1.0.0` |
+| `OTEL_LOG_LEVEL` | Logging level (`info`, `debug`) | `info` |
+
+### Trace Flow Diagrams
+
+#### OIDC Playground
+
+All Keycloak interactions are proxied through the frontend server for full trace correlation:
+
+```
+┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
+│          │      │                     │      │              │
+│  Browser │─────▶│  OIDC Frontend      │─────▶│   Keycloak   │
+│          │      │  (Express + OTel)   │      │   (OTel)     │
+│          │      │                     │      │              │
+└──────────┘      └─────────────────────┘      └──────────────┘
+     │                     │                          │
+     │  /api/keycloak/*    │   /.well-known/*         │
+     │  ─────────────────▶ │   /protocol/openid/*     │
+     │                     │   ──────────────────────▶│
+     │                     │                          │
+     └─────────────────────┴──────────────────────────┘
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │   OpenTelemetry         │
+              │   Collector             │
+              │   (Tempo/Jaeger/etc.)   │
+              └─────────────────────────┘
+```
+
+**Traced Operations:**
+- `GET /api/keycloak/discovery` → Keycloak OIDC Discovery
+- `POST /api/keycloak/token` → Token Exchange
+- `POST /api/keycloak/refresh` → Token Refresh
+- `GET /api/keycloak/userinfo` → UserInfo Endpoint
+
+#### OAuth Playground
+
+The OAuth flow involves three services with full trace propagation:
+
+```
+┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
+│          │      │                     │      │              │
+│  Browser │─────▶│  OAuth Frontend     │─────▶│   Keycloak   │
+│          │      │  (Express + OTel)   │      │   (OTel)     │
+│          │      │                     │      │              │
+└──────────┘      └──────────┬──────────┘      └──────────────┘
+                             │                        ▲
+                             │                        │
+                             ▼                        │
+                  ┌─────────────────────┐             │
+                  │                     │  Token      │
+                  │  OAuth Backend      │  Validation │
+                  │  (Express + OTel +  │─────────────┘
+                  │   keycloak-connect) │
+                  │                     │
+                  └─────────────────────┘
+                             │
+                             ▼
+              ┌─────────────────────────┐
+              │   OpenTelemetry         │
+              │   Collector             │
+              └─────────────────────────┘
+```
+
+**Complete Trace Flow:**
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                         Single Distributed Trace                       │
+├────────────────────────────────────────────────────────────────────────┤
+│                                                                        │
+│  Browser Request                                                       │
+│  ════════════════                                                      │
+│       │                                                                │
+│       ▼                                                                │
+│  ┌─────────────────────────────────────────────────────────────────┐   │
+│  │ oauth-playground-frontend                                       │   │
+│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
+│  │ │ GET /api/keycloak/discovery                                 │ │   │
+│  │ │    └──▶ GET keycloak/.well-known/openid-configuration       │ │   │
+│  │ └─────────────────────────────────────────────────────────────┘ │   │
+│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
+│  │ │ POST /api/keycloak/token                                    │ │   │
+│  │ │    └──▶ POST keycloak/protocol/openid-connect/token         │ │   │
+│  │ └─────────────────────────────────────────────────────────────┘ │   │
+│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
+│  │ │ GET /api/service                                            │ │   │
+│  │ │    └──▶ ┌────────────────────────────────────────────────┐  │ │   │
+│  │ │         │ oauth-playground-backend                       │  │ │   │
+│  │ │         │ ┌────────────────────────────────────────────┐ │  │ │   │
+│  │ │         │ │ GET /secured                               │ │  │ │   │
+│  │ │         │ │    └──▶ keycloak (token validation)        │ │  │ │   │
+│  │ │         │ └────────────────────────────────────────────┘ │  │ │   │
+│  │ │         └────────────────────────────────────────────────┘  │ │   │
+│  │ └─────────────────────────────────────────────────────────────┘ │   │
+│  └─────────────────────────────────────────────────────────────────┘   │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### Viewing Traces
+
+Traces can be viewed in any OpenTelemetry-compatible backend:
+
+- **Grafana Tempo** - Query by service name or trace ID
+- **Jaeger** - Search by service, operation, or tags
+- **Zipkin** - Compatible with W3C trace context
+
+Example trace search:
+```bash
+# Find traces by service name
+service.name = "oidc-playground"
+service.name = "oauth-playground-frontend"
+service.name = "oauth-playground-backend"
+```
+
+### Local Development with Tracing
+
+To run with tracing locally using the Grafana LGTM stack (Loki, Grafana, Tempo, Mimir):
+
+```bash
+# Start the LGTM stack (all-in-one observability)
+docker run -d --name lgtm \
+  -p 3100:3000 \
+  -p 4317:4317 \
+  -p 4318:4318 \
+  grafana/otel-lgtm:latest
+
+# Run the application with tracing
+cd 01-OIDC
+npm start
+
+# Or without tracing
+npm run start:no-tracing
+```
+
+**LGTM Stack Ports:**
+| Port | Service | Description |
+|------|---------|-------------|
+| 3100 | Grafana | UI for exploring traces, logs, and metrics |
+| 4317 | OTLP gRPC | OpenTelemetry traces/metrics/logs (gRPC) |
+| 4318 | OTLP HTTP | OpenTelemetry traces/metrics/logs (HTTP) |
+
+Access Grafana at `http://localhost:3100` and navigate to **Explore → Tempo** to view traces.
