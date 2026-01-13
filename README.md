@@ -55,22 +55,6 @@ oc apply -k 02-Oauth2/frontend/_openshift/
 Update environment variables and ConfigMap to match your environment:
 
 ```bash
-# Get the backend route URL
-BACKEND_ROUTE=$(oc get route oauth-playground-backend -o jsonpath='https://{.spec.host}')
-
-# Update OIDC Playground
-oc set env deployment/oidc-playground \
-  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
-  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
-  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
-
-# Update OAuth Frontend
-oc set env deployment/oauth-playground-frontend \
-  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
-  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
-  SERVICE_URL="${BACKEND_ROUTE}/secured" \
-  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
-
 # Update OAuth Backend ConfigMap first (keycloak.json)
 oc patch configmap oauth-playground-backend-config --type merge -p '
 {
@@ -78,6 +62,18 @@ oc patch configmap oauth-playground-backend-config --type merge -p '
     "keycloak.json": "{\n  \"realm\": \"demo\",\n  \"auth-server-url\": \"https://sso.apps.ocp4.jnyilimb.eu/\",\n  \"ssl-required\": \"all\",\n  \"resource\": \"oauth-backend\",\n  \"verify-token-audience\": true,\n  \"credentials\": {},\n  \"use-resource-role-mappings\": true,\n  \"confidential-port\": 0\n}"
   }
 }'
+
+# Update OIDC Playground
+oc set env deployment/oidc-playground \
+  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
+  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+
+# Update OAuth Frontend (uses internal K8s service for backend - no external route needed)
+oc set env deployment/oauth-playground-frontend \
+  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
+  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
 
 # Update OAuth Backend (triggers rollout, picks up updated ConfigMap)
 oc set env deployment/oauth-playground-backend \
