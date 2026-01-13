@@ -6,6 +6,9 @@ const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-grpc')
 const { Resource } = require('@opentelemetry/resources');
 const { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } = require('@opentelemetry/semantic-conventions');
 const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
+const { W3CTraceContextPropagator } = require('@opentelemetry/core');
+const { W3CBaggagePropagator } = require('@opentelemetry/core');
+const { CompositePropagator } = require('@opentelemetry/core');
 
 // Enable diagnostic logging if OTEL_LOG_LEVEL is set
 const logLevel = process.env.OTEL_LOG_LEVEL || 'info';
@@ -31,6 +34,13 @@ const sdk = new NodeSDK({
   traceExporter: new OTLPTraceExporter({
     url: otlpEndpoint,
   }),
+  // Configure context propagation for distributed tracing
+  textMapPropagator: new CompositePropagator({
+    propagators: [
+      new W3CTraceContextPropagator(),  // Propagates traceparent & tracestate headers
+      new W3CBaggagePropagator(),       // Propagates baggage header for custom context
+    ],
+  }),
   instrumentations: [
     getNodeAutoInstrumentations({
       // Express instrumentation is included by default
@@ -39,6 +49,8 @@ const sdk = new NodeSDK({
       },
       '@opentelemetry/instrumentation-http': {
         enabled: true,
+        // Ensure headers are propagated on outgoing requests
+        propagateTraceHeaderCorsUrls: [/.*/],  // Propagate to all URLs
       },
       // Disable file system instrumentation to reduce noise
       '@opentelemetry/instrumentation-fs': {
