@@ -59,7 +59,7 @@ Update environment variables and ConfigMap to match your environment:
 oc patch configmap oauth-playground-backend-config --type merge -p '
 {
   "data": {
-    "keycloak.json": "{\n  \"realm\": \"demo\",\n  \"auth-server-url\": \"https://sso.apps.ocp4.jnyilimb.eu/\",\n  \"ssl-required\": \"all\",\n  \"resource\": \"oauth-backend\",\n  \"verify-token-audience\": true,\n  \"credentials\": {},\n  \"use-resource-role-mappings\": true,\n  \"confidential-port\": 0\n}"
+    "keycloak.json": "{\n  \"realm\": \"demo\",\n  \"auth-server-url\": \"https://sso.apps.ocp4.jnyilimb.eu/\",\n  \"ssl-required\": \"all\",\n  \"resource\": \"oauth-backend\",\n  \"bearer-only\": true,\n  \"verify-token-audience\": true,\n  \"credentials\": {},\n  \"use-resource-role-mappings\": true,\n  \"confidential-port\": 0\n}"
   }
 }'
 
