@@ -109,5 +109,5 @@ Get your application URLs:
 ```bash
 echo "OIDC Playground: https://$(oc get route oidc-playground -o jsonpath='{.spec.host}')"
 echo "OAuth Frontend:  https://$(oc get route oauth-playground-frontend -o jsonpath='{.spec.host}')"
-echo "OAuth Backend:   https://$(oc get route oauth-playground-backend -o jsonpath='{.spec.host}')"
+# Note: OAuth Backend has no external route - accessed via frontend proxy
 ```
