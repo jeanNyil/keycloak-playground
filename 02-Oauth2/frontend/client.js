@@ -2,7 +2,7 @@
 /* OAuth 2.0 functions */
 /***********************/
 
-// Load the OpenID Provider Configuration
+// Load the OpenID Provider Configuration (via proxy for distributed tracing)
 function loadDiscovery() {
     var issuer = getInput('input-issuer');
     setState('issuer', issuer);
@@ -14,7 +14,8 @@ function loadDiscovery() {
             setOutput('output-discovery', state.discovery);
         }
     }
-    req.open('GET', issuer + '/.well-known/openid-configuration', true);
+    // Use proxy endpoint for distributed tracing
+    req.open('GET', '/api/keycloak/discovery?issuer=' + encodeURIComponent(issuer), true);
     req.send();
 }
 
@@ -41,14 +42,18 @@ function generateAuthorizationRequest() {
     document.location.href = req;
 }
 
-// Create a Token Exchange Request
+// Create a Token Exchange Request (via proxy for distributed tracing)
 function loadTokens(code) {
     var clientId = getInput('input-clientid');
 
-    var params = 'grant_type=authorization_code';
-    params += '&code=' + code;
-    params += '&client_id=' + clientId;
-    params += '&redirect_uri=' + document.location.href.split('?')[0];
+    // Use proxy endpoint for distributed tracing
+    var proxyParams = {
+        token_endpoint: state.discovery['token_endpoint'],
+        grant_type: 'authorization_code',
+        code: code,
+        client_id: clientId,
+        redirect_uri: document.location.href.split('?')[0]
+    };
 
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
@@ -71,15 +76,15 @@ function loadTokens(code) {
             }
         }
     }
-    req.open('POST', state.discovery['token_endpoint'], true);
-    req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    req.open('POST', '/api/keycloak/token', true);
+    req.setRequestHeader('Content-type', 'application/json');
 
-    req.send(params);
+    req.send(JSON.stringify(proxyParams));
 
     window.history.pushState({}, document.title, '/');
 }
 
-// Create a Service Request
+// Create a Service Request (via proxy for distributed tracing)
 function invokeService() {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
@@ -91,7 +96,8 @@ function invokeService() {
             }
         }
     }
-    console.debug(serviceUrl);
+    // Use proxy endpoint for distributed tracing (serviceUrl is now /api/service)
+    console.debug('Calling service via proxy:', serviceUrl);
     req.open('GET', serviceUrl, true);
     req.setRequestHeader('Authorization', 'Bearer ' + state.accessToken);
 
