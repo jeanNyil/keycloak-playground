@@ -60,9 +60,14 @@ app.use(keycloak.middleware());
 
 // Logging middleware for all requests
 app.use(function(req, res, next) {
+  // Skip logging for root path (used by health probes)
+  if (req.path === '/') {
+    return next();
+  }
+  
   const authHeader = req.headers['authorization'];
   const hasToken = authHeader && authHeader.startsWith('Bearer ');
-  const isPublicEndpoint = req.path === '/public' || req.path === '/';
+  const isPublicEndpoint = req.path === '/public';
   
   // Differentiate log message for public vs secured endpoints
   if (isPublicEndpoint) {
