@@ -35,7 +35,7 @@ spec:
               value: "https://sso.apps.example.com/realms/demo"
             - name: SERVICE_URL
               # Internal Kubernetes service URL (proxy makes server-to-server calls)
-              value: "http://oauth-playground-backend:3000/secured"
+              value: "http://oauth-playground-backend:3000"
             - name: OTEL_SERVICE_NAME
               value: "oauth-playground-frontend"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
