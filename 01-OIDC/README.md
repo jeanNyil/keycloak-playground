@@ -34,3 +34,31 @@
         After Keycloak has redirected back to the playground application, you will see the authentication response in the **`Authentication Response`** section. The code is what is called the **`authorization code`**, which the application uses to obtain the ID token and the refresh token.
     3. Click on the button labeled **`3 - Token`**. You will see the authorization code has already been filled in on the form so you can go ahead and click on the button labeled **`Send Token Request`**.
     4. Click on **`5 - UserInfo`** to invoke the UserInfo endpoint. Under **`UserInfo Request`**, you will see that playground application is sending a request to the Keycloak UserInfo endpoint, including the access token in the authorization header.
+
+---
+
+## Reset vs Logout
+
+The playground provides two buttons to restart the flow:
+
+| Aspect | Reset | Logout |
+|--------|-------|--------|
+| **Local State** | ✅ Clears localStorage | ✅ Clears localStorage |
+| **Keycloak Session** | ❌ Keeps SSO session active | ✅ Terminates SSO session |
+| **Browser Cookies** | ❌ Keeps Keycloak cookies | ✅ Keycloak clears its cookies |
+| **Network Call** | ❌ None | ✅ Calls `end_session_endpoint` |
+
+### When to Use Each
+
+| Use Case | Button |
+|----------|--------|
+| Start over but stay logged in | **Reset** |
+| Test the full login flow again | **Logout** |
+| Switch to a different user | **Logout** |
+| Clear UI state only | **Reset** |
+
+### Behavior Difference
+
+- **Reset**: App restarts at Discovery step. If you send a new authentication request, you will be **automatically logged in** (no password prompt) because the Keycloak SSO session is still active.
+
+- **Logout**: App restarts at Discovery step. If you send a new authentication request, the **Keycloak login page appears** because the SSO session has been terminated.

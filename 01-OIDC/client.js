@@ -182,6 +182,30 @@ function reset() {
     window.location.reload();
 }
 
+// Logout from Keycloak and clear local state (via proxy for distributed tracing)
+function logout() {
+    if (!state.discovery || !state.discovery['end_session_endpoint']) {
+        alert('Please load discovery first to enable logout');
+        return;
+    }
+
+    var idTokenHint = state.idToken || '';
+    var postLogoutRedirectUri = document.location.href.split('?')[0];
+
+    // Clear local state first
+    localStorage.removeItem('state');
+
+    // Redirect to logout proxy endpoint
+    var logoutUrl = '/api/keycloak/logout?' + 
+        'end_session_endpoint=' + encodeURIComponent(state.discovery['end_session_endpoint']) +
+        '&post_logout_redirect_uri=' + encodeURIComponent(postLogoutRedirectUri);
+    if (idTokenHint) {
+        logoutUrl += '&id_token_hint=' + encodeURIComponent(idTokenHint);
+    }
+
+    window.location.href = logoutUrl;
+}
+
 function loadState() {
    var s = localStorage.getItem('state');
    if (s) {

@@ -77,6 +77,24 @@ app.post('/api/keycloak/token', async function(req, res) {
     }
 });
 
+// Proxy endpoint for Keycloak logout - enables distributed tracing
+app.get('/api/keycloak/logout', async function(req, res) {
+    const endSessionEndpoint = req.query.end_session_endpoint;
+    const postLogoutRedirectUri = req.query.post_logout_redirect_uri;
+    const idTokenHint = req.query.id_token_hint;
+
+    console.log('Proxying logout request to:', endSessionEndpoint);
+
+    // Build Keycloak logout URL
+    let logoutUrl = endSessionEndpoint + '?post_logout_redirect_uri=' + encodeURIComponent(postLogoutRedirectUri);
+    if (idTokenHint) {
+        logoutUrl += '&id_token_hint=' + encodeURIComponent(idTokenHint);
+    }
+
+    // Redirect to Keycloak logout
+    res.redirect(logoutUrl);
+});
+
 app.use(express.static('.'))
 
 app.get('/', function(req, res) {
