@@ -87,26 +87,41 @@ function loadTokens(code) {
     window.history.pushState({}, document.title, '/');
 }
 
-// Create a Service Request (via proxy for distributed tracing)
-function invokeService() {
+// Invoke the public endpoint (no authentication required)
+function invokePublicService() {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
         if (req.readyState === 4) {
             if (req.status === 0) {
-                setOutput('output-serviceResponse', "Failed to send request");
+                setOutput('output-publicResponse', "Failed to send request");
             } else {
-                setOutput('output-serviceResponse', req.responseText);
+                var statusIcon = req.status < 400 ? '✓' : '✗';
+                setOutput('output-publicResponse', statusIcon + ' [' + req.status + '] ' + req.responseText);
             }
         }
     }
-    // Use proxy endpoint for distributed tracing (serviceUrl is now /api/service)
-    console.debug('Calling service via proxy:', serviceUrl);
-    req.open('GET', serviceUrl, true);
-    req.setRequestHeader('Authorization', 'Bearer ' + state.accessToken);
-
+    console.debug('Calling public service via proxy');
+    req.open('GET', '/api/service/public', true);
     req.send();
+}
 
-    window.history.pushState({}, document.title, '/');
+// Invoke the secured endpoint (requires oauth-backend:user role)
+function invokeSecuredService() {
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function() {
+        if (req.readyState === 4) {
+            if (req.status === 0) {
+                setOutput('output-securedResponse', "Failed to send request");
+            } else {
+                var statusIcon = req.status < 400 ? '✓' : '✗';
+                setOutput('output-securedResponse', statusIcon + ' [' + req.status + '] ' + req.responseText);
+            }
+        }
+    }
+    console.debug('Calling secured service via proxy');
+    req.open('GET', '/api/service/secured', true);
+    req.setRequestHeader('Authorization', 'Bearer ' + state.accessToken);
+    req.send();
 }
 
 /*************************/

@@ -1,5 +1,5 @@
 {
-  "realm": "demo",
+  "realm": "${env.KC_REALM:demo}",
   "auth-server-url": "${env.KC_URL:http://localhost:8080/}",
   "ssl-required": "all",
   "resource": "oauth-backend",

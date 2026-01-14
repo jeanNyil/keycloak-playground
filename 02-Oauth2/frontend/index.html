@@ -3,9 +3,6 @@
 <head>
     <title>OAuth 2.0 Playground</title>
     <script type="text/javascript" src="KC_URL/js/keycloak.js"></script>
-    <script type="text/javascript">
-        var serviceUrl = 'SERVICE_URL';
-    </script>
     <script type="text/javascript" src="client.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -75,13 +72,22 @@
 
 <div id="step-invoke" style="display: none;">
     <h2>Invoke Service</h2>
+
+    <h3>Public Endpoint</h3>
     <p>
-        <button onclick="invokeService()">Invoke</button>
+        <button onclick="invokePublicService()">Invoke /public</button>
+        <span style="color: #666; font-size: 0.9em;">(no authentication required)</span>
     </p>
+    <pre id="output-publicResponse"></pre>
+
     <hr/>
 
-    <h3>Response</h3>
-    <pre id="output-serviceResponse"></pre>
+    <h3>Secured Endpoint</h3>
+    <p>
+        <button onclick="invokeSecuredService()">Invoke /secured</button>
+        <span style="color: #666; font-size: 0.9em;">(requires oauth-backend:user role)</span>
+    </p>
+    <pre id="output-securedResponse"></pre>
 </div>
 
 </body>
