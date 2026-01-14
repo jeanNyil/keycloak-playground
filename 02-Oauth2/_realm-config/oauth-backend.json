@@ -9,7 +9,6 @@
   "enabled": true,
   "alwaysDisplayInConsole": false,
   "clientAuthenticatorType": "client-secret",
-  "secret": "q56y5QG1Rblawu6208XUe3viztdWgzQf",
   "redirectUris": [
     "/*"
   ],
@@ -23,7 +22,7 @@
   "implicitFlowEnabled": false,
   "directAccessGrantsEnabled": false,
   "serviceAccountsEnabled": false,
-  "publicClient": false,
+  "publicClient": true,
   "frontchannelLogout": true,
   "protocol": "openid-connect",
   "attributes": {
@@ -33,13 +32,13 @@
     "backchannel.logout.session.required": "true",
     "standard.token.exchange.enabled": "false",
     "frontchannel.logout.session.required": "true",
-    "display.on.consent.screen": "false",
     "oauth2.device.authorization.grant.enabled": "false",
+    "display.on.consent.screen": "false",
     "backchannel.logout.revoke.offline.tokens": "false",
     "dpop.bound.access.tokens": "false"
   },
   "authenticationFlowBindingOverrides": {},
-  "fullScopeAllowed": true,
+  "fullScopeAllowed": false,
   "nodeReRegistrationTimeout": -1,
   "defaultClientScopes": [
     "web-origins",
