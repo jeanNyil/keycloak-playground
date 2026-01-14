@@ -1,11 +1,49 @@
-# RHBK PlayGround
+# Keycloak PlayGround
 
 - [OpenID Connect Playground](./01-OIDC/README.md)
 - [OAuth 2 Playground](./02-Oauth2/README.md)
 
 ---
 
+## Prerequisites
+
+Before running the playgrounds, you need:
+
+### Keycloak Server
+
+A running instance of Keycloak (or Red Hat build of Keycloak) - either:
+- **Local**: Keycloak running on `http://localhost:8080`
+- **Remote**: Keycloak accessible via URL (e.g., `https://sso.apps.example.com`)
+
+### Realm Configuration
+
+A configured realm with the following:
+- **Realm name**: e.g., `demo` (or your custom realm)
+- **OIDC Client**: For the OIDC Playground
+  - Client ID: `oidc-playground`
+  - Access Type: `public`
+  - Valid Redirect URIs: `http://localhost:8000/*` (or your deployment URL)
+  - Web Origins: `*` or specific origins
+- **OAuth Client**: For the OAuth Playground frontend
+  - Client ID: `oauth-playground`
+  - Access Type: `public`
+  - Valid Redirect URIs: `http://localhost:8000/*` (or your deployment URL)
+  - Web Origins: `*` or specific origins
+- **OAuth Backend Client**: For the OAuth Playground backend
+  - Client ID: `oauth-backend`
+  - Access Type: `public` or `confidential`
+  - **Client Role**: `user` (required for secured endpoint access)
+- **Test User**: A user with the `oauth-backend:user` client role assigned
+
+> **Note**: Sample Keycloak client configurations are available in:
+> - `01-OIDC/_realm-config/` - OIDC client configuration
+> - `02-Oauth2/_realm-config/` - OAuth client configurations
+
+---
+
 ## Build and Push Container Images
+
+> **Note**: Pre-built images are available at `quay.io/jnyilimbibi` and can be used directly for deployment. If you want to build your own images, replace `<YOUR_QUAY_USERNAME>` with your Quay.io username or container registry organization name.
 
 ```bash
 # Login to Quay.io
@@ -13,19 +51,24 @@ podman login quay.io
 
 # OIDC Playground
 cd 01-OIDC
-podman build -t quay.io/jnyilimbibi/oidc-playground:1.0.0 .
-podman push quay.io/jnyilimbibi/oidc-playground:1.0.0
+podman build -t quay.io/<YOUR_QUAY_USERNAME>/oidc-playground:1.0.0 .
+podman push quay.io/<YOUR_QUAY_USERNAME>/oidc-playground:1.0.0
 
 # OAuth Frontend
 cd ../02-Oauth2/frontend
-podman build -t quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0 .
-podman push quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0
+podman build -t quay.io/<YOUR_QUAY_USERNAME>/oauth-playground-frontend:1.0.0 .
+podman push quay.io/<YOUR_QUAY_USERNAME>/oauth-playground-frontend:1.0.0
 
 # OAuth Backend
 cd ../backend
-podman build -t quay.io/jnyilimbibi/oauth-playground-backend:1.0.0 .
-podman push quay.io/jnyilimbibi/oauth-playground-backend:1.0.0
+podman build -t quay.io/<YOUR_QUAY_USERNAME>/oauth-playground-backend:1.0.0 .
+podman push quay.io/<YOUR_QUAY_USERNAME>/oauth-playground-backend:1.0.0
 ```
+
+> **Important**: If you built custom images with your own Quay username, you must update the image references in the OpenShift deployment manifests before deploying:
+> - `01-OIDC/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/oidc-playground:1.0.0`
+> - `02-Oauth2/frontend/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/oauth-playground-frontend:1.0.0`
+> - `02-Oauth2/backend/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/oauth-playground-backend:1.0.0`
 
 ---
 
@@ -55,29 +98,44 @@ oc apply -k 02-Oauth2/frontend/_openshift/
 Update environment variables and ConfigMap to match your environment:
 
 ```bash
+# Set your environment-specific values
+KC_URL="https://<YOUR_KEYCLOAK_HOST>/"              # e.g., https://sso.apps.example.com/
+INPUT_ISSUER="${KC_URL}realms/<YOUR_REALM>"         # e.g., https://sso.apps.example.com/realms/demo
+OTEL_ENDPOINT="http://<YOUR_OTEL_COLLECTOR>"        # e.g., http://otel-collector.observability.svc:4317
+
 # Update OAuth Backend ConfigMap first (keycloak.json)
-oc patch configmap oauth-playground-backend-config --type merge -p '
-{
-  "data": {
-    "keycloak.json": "{\n  \"realm\": \"demo\",\n  \"auth-server-url\": \"https://sso.apps.ocp4.jnyilimb.eu/\",\n  \"ssl-required\": \"all\",\n  \"resource\": \"oauth-backend\",\n  \"bearer-only\": true,\n  \"verify-token-audience\": true,\n  \"credentials\": {},\n  \"use-resource-role-mappings\": true,\n  \"confidential-port\": 0\n}"
+oc patch configmap oauth-playground-backend-config --type merge -p "{
+  \"data\": {
+    \"keycloak.json\": \"{\n  \\\"realm\\\": \\\"<YOUR_REALM>\\\",\n  \\\"auth-server-url\\\": \\\"${KC_URL}\\\",\n  \\\"ssl-required\\\": \\\"all\\\",\n  \\\"resource\\\": \\\"oauth-backend\\\",\n  \\\"bearer-only\\\": true,\n  \\\"verify-token-audience\\\": true,\n  \\\"credentials\\\": {},\n  \\\"use-resource-role-mappings\\\": true,\n  \\\"confidential-port\\\": 0\n}\"
   }
-}'
+}"
 
 # Update OIDC Playground
 oc set env deployment/oidc-playground \
-  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
-  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
-  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+  KC_URL="${KC_URL}" \
+  INPUT_ISSUER="${INPUT_ISSUER}" \
+  OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
 
 # Update OAuth Frontend (uses internal K8s service for backend - no external route needed)
 oc set env deployment/oauth-playground-frontend \
-  KC_URL=https://sso.apps.ocp4.jnyilimb.eu/ \
-  INPUT_ISSUER=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
-  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+  KC_URL="${KC_URL}" \
+  INPUT_ISSUER="${INPUT_ISSUER}" \
+  OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
 
 # Update OAuth Backend (triggers rollout, picks up updated ConfigMap)
 oc set env deployment/oauth-playground-backend \
-  OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.observability.svc:4317
+  OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
+```
+
+**Example with actual values:**
+
+```bash
+# Example: Using a Keycloak instance at sso.apps.ocp4.jnyilimb.eu
+KC_URL="https://sso.apps.ocp4.jnyilimb.eu/"
+INPUT_ISSUER="${KC_URL}realms/demo"
+OTEL_ENDPOINT="http://otel-collector.observability.svc:4317"
+
+# Then run the commands above...
 ```
 
 ---
