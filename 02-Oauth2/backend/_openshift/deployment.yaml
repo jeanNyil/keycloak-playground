@@ -41,13 +41,13 @@ spec:
               cpu: "500m"
           livenessProbe:
             httpGet:
-              path: /public
+              path: /
               port: 3000
             initialDelaySeconds: 10
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /public
+              path: /
               port: 3000
             initialDelaySeconds: 5
             periodSeconds: 5
