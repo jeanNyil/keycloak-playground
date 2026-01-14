@@ -38,6 +38,13 @@ A configured realm with the following:
 > **Note**: Sample Keycloak client configurations are available in:
 > - `01-OIDC/_realm-config/` - OIDC client configuration
 > - `02-Oauth2/_realm-config/` - OAuth client configurations
+>
+> **Important**: After importing the `oauth-backend` client configuration, you must manually create the `user` client role in the Keycloak Admin UI, as client roles cannot be imported via the UI:
+> 1. Navigate to **Clients** → **oauth-backend** → **Roles** tab
+> 2. Click **Create Role**
+> 3. Set **Role Name** to `user`
+> 4. Save the role
+> 5. Assign this role to your test user via **Users** → *[select user]* → **Role Mapping** → **Client Roles** → **oauth-backend**
 
 ---
 
