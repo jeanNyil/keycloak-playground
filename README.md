@@ -106,14 +106,15 @@ Update environment variables and ConfigMap to match your environment:
 
 ```bash
 # Set your environment-specific values
+KC_REALM="<YOUR_REALM>"                             # e.g., demo
 KC_URL="https://<YOUR_KEYCLOAK_HOST>/"              # e.g., https://sso.apps.example.com/
-INPUT_ISSUER="${KC_URL}realms/<YOUR_REALM>"         # e.g., https://sso.apps.example.com/realms/demo
+INPUT_ISSUER="${KC_URL}realms/${KC_REALM}"          # e.g., https://sso.apps.example.com/realms/demo
 OTEL_ENDPOINT="http://<YOUR_OTEL_COLLECTOR>"        # e.g., http://otel-collector.observability.svc:4317
 
 # Update OAuth Backend ConfigMap first (keycloak.json)
 oc patch configmap oauth-playground-backend-config --type merge -p "{
   \"data\": {
-    \"keycloak.json\": \"{\n  \\\"realm\\\": \\\"<YOUR_REALM>\\\",\n  \\\"auth-server-url\\\": \\\"${KC_URL}\\\",\n  \\\"ssl-required\\\": \\\"all\\\",\n  \\\"resource\\\": \\\"oauth-backend\\\",\n  \\\"bearer-only\\\": true,\n  \\\"verify-token-audience\\\": true,\n  \\\"credentials\\\": {},\n  \\\"use-resource-role-mappings\\\": true,\n  \\\"confidential-port\\\": 0\n}\"
+    \"keycloak.json\": \"{\n  \\\"realm\\\": \\\"${KC_REALM}\\\",\n  \\\"auth-server-url\\\": \\\"${KC_URL}\\\",\n  \\\"ssl-required\\\": \\\"all\\\",\n  \\\"resource\\\": \\\"oauth-backend\\\",\n  \\\"bearer-only\\\": true,\n  \\\"verify-token-audience\\\": true,\n  \\\"credentials\\\": {},\n  \\\"use-resource-role-mappings\\\": true,\n  \\\"confidential-port\\\": 0\n}\"
   }
 }"
 
@@ -138,8 +139,9 @@ oc set env deployment/oauth-playground-backend \
 
 ```bash
 # Example: Using a Keycloak instance at sso.apps.ocp4.jnyilimb.eu
+KC_REALM="demo"
 KC_URL="https://sso.apps.ocp4.jnyilimb.eu/"
-INPUT_ISSUER="${KC_URL}realms/demo"
+INPUT_ISSUER="${KC_URL}realms/${KC_REALM}"
 OTEL_ENDPOINT="http://otel-collector.observability.svc:4317"
 
 # Then run the commands above...
