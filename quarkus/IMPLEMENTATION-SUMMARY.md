@@ -160,7 +160,7 @@ cd ../frontend && ./mvnw clean package -Dquarkus.kubernetes.deploy=true
 
 # Update environment variables (see README)
 # Get route URL
-oc get route quarkus-frontend
+oc get route quarkus-oauth-playground-frontend
 ```
 
 ---

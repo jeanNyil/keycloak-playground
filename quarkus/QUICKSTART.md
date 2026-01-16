@@ -182,7 +182,7 @@ Both apps automatically start with the Grafana LGTM stack in dev mode:
 2. Start frontend: `./mvnw quarkus:dev`
 3. Open Grafana: **http://localhost:3000**
 4. Navigate to: **Explore → Tempo**
-5. Query: `{service.name="quarkus-frontend"}`
+5. Query: `{service.name="quarkus-oauth-playground-frontend"}`
 6. 🎉 See distributed traces!
 
 ---

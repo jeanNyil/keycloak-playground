@@ -124,17 +124,17 @@ Update the environment variables in OpenShift:
 
 ```bash
 # Get the backend service URL (internal K8s service)
-BACKEND_URL="http://quarkus-backend:8080"
+BACKEND_URL="http://quarkus-oauth-playground-backend:8080"
 
 # Update backend with your Keycloak settings
-oc set env deployment/quarkus-backend \
+oc set env deployment/quarkus-oauth-playground-backend \
   QUARKUS_OIDC_AUTH_SERVER_URL="https://sso.apps.example.com/realms/demo" \
   QUARKUS_OIDC_CLIENT_ID="quarkus-oauth-backend" \
   QUARKUS_OIDC_CREDENTIALS_SECRET="<your-backend-secret>" \
   QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4317"
 
 # Update frontend with your Keycloak settings and backend URL
-oc set env deployment/quarkus-frontend \
+oc set env deployment/quarkus-oauth-playground-frontend \
   QUARKUS_OIDC_AUTH_SERVER_URL="https://sso.apps.example.com/realms/demo" \
   QUARKUS_OIDC_CLIENT_ID="quarkus-oauth-playground" \
   QUARKUS_OIDC_CREDENTIALS_SECRET="<your-frontend-secret>" \
@@ -146,7 +146,7 @@ oc set env deployment/quarkus-frontend \
 
 Both applications are instrumented with OpenTelemetry for distributed tracing:
 
-- **Service names**: `quarkus-frontend`, `quarkus-backend`
+- **Service names**: `quarkus-oauth-playground-frontend`, `quarkus-oauth-playground-backend`
 - **Exporter**: OTLP/gRPC
 - **Propagation**: W3C Trace Context
 
