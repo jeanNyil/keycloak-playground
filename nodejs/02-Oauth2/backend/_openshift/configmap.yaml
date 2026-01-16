@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodejs-oauth-playground-backend-config
+  labels:
+    app: nodejs-oauth-playground-backend
+    app.kubernetes.io/name: nodejs-oauth-playground-backend
+    app.kubernetes.io/component: nodejs-backend
+    app.kubernetes.io/part-of: nodejs-playground
+data:
+  keycloak.json: |
+    {
+      "realm": "demo",
+      "auth-server-url": "https://sso.apps.example.com/",
+      "ssl-required": "all",
+      "resource": "nodejs-oauth-backend",
+      "bearer-only": true,
+      "verify-token-audience": true,
+      "credentials": {},
+      "use-resource-role-mappings": true,
+      "confidential-port": 0
+    }

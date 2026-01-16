@@ -1,0 +1,19 @@
+{
+  "name": "nodejs-oauth-playground-frontend",
+  "version": "1.0.0",
+  "description": "OAuth 2.0 Playground frontend application",
+  "scripts": {
+    "start": "node --require ./tracing.js app.js",
+    "start:no-tracing": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "string-replace-middleware": "^1.0.2",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.54.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.57.0",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0"
+  }
+}

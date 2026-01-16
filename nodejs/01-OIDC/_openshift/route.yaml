@@ -1,0 +1,20 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: nodejs-oidc-playground
+  labels:
+    app: nodejs-oidc-playground
+    app.kubernetes.io/name: nodejs-oidc-playground
+    app.kubernetes.io/component: nodejs-frontend
+    app.kubernetes.io/part-of: nodejs-playground
+spec:
+  to:
+    kind: Service
+    name: nodejs-oidc-playground
+    weight: 100
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

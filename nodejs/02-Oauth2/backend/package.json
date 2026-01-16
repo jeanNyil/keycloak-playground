@@ -1,0 +1,21 @@
+{
+  "name": "nodejs-oauth-playground-backend",
+  "version": "1.0.0",
+  "description": "OAuth 2.0 Playground backend service",
+  "scripts": {
+    "start": "node --require ./tracing.js app.js",
+    "start:no-tracing": "node app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "keycloak-connect": "^26.1.1",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/sdk-node": "^0.57.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.54.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.57.0",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0"
+  }
+}

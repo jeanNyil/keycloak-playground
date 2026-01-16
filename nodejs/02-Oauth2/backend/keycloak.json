@@ -1,0 +1,10 @@
+{
+  "realm": "${env.KC_REALM:demo}",
+  "auth-server-url": "${env.KC_URL:http://localhost:8080/}",
+  "ssl-required": "all",
+  "resource": "nodejs-oauth-backend",
+  "bearer-only": true,
+  "verify-token-audience": true,
+  "use-resource-role-mappings": true,
+  "confidential-port": 0
+}
