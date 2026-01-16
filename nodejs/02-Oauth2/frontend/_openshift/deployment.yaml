@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nodejs-oauth-playground-frontend
+  annotations:
+    app.openshift.io/connects-to: '[{"apiVersion":"apps/v1","kind":"Deployment","name":"nodejs-oauth-playground-backend"}]'
   labels:
     app: nodejs-oauth-playground-frontend
     app.kubernetes.io/name: nodejs-oauth-playground-frontend
@@ -35,7 +37,7 @@ spec:
               value: "https://sso.apps.example.com/realms/demo"
             - name: SERVICE_URL
               # Internal Kubernetes service URL (proxy makes server-to-server calls)
-              value: "http://oauth-playground-backend:3000"
+              value: "http://nodejs-oauth-playground-backend:3000"
             - name: OTEL_SERVICE_NAME
               value: "nodejs-oauth-playground-frontend"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT

@@ -112,26 +112,26 @@ INPUT_ISSUER="${KC_URL}realms/${KC_REALM}"          # e.g., https://sso.apps.exa
 OTEL_ENDPOINT="http://<YOUR_OTEL_COLLECTOR>"        # e.g., http://otel-collector.observability.svc:4317
 
 # Update OAuth Backend ConfigMap first (keycloak.json)
-oc patch configmap oauth-playground-backend-config --type merge -p "{
+oc patch configmap nodejs-oauth-playground-backend-config --type merge -p "{
   \"data\": {
     \"keycloak.json\": \"{\n  \\\"realm\\\": \\\"${KC_REALM}\\\",\n  \\\"auth-server-url\\\": \\\"${KC_URL}\\\",\n  \\\"ssl-required\\\": \\\"all\\\",\n  \\\"resource\\\": \\\"nodejs-oauth-backend\\\",\n  \\\"bearer-only\\\": true,\n  \\\"verify-token-audience\\\": true,\n  \\\"credentials\\\": {},\n  \\\"use-resource-role-mappings\\\": true,\n  \\\"confidential-port\\\": 0\n}\"
   }
 }"
 
 # Update OIDC Playground
-oc set env deployment/oidc-playground \
+oc set env deployment/nodejs-oidc-playground \
   KC_URL="${KC_URL}" \
   INPUT_ISSUER="${INPUT_ISSUER}" \
   OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
 
 # Update OAuth Frontend (uses internal K8s service for backend - no external route needed)
-oc set env deployment/oauth-playground-frontend \
+oc set env deployment/nodejs-oauth-playground-frontend \
   KC_URL="${KC_URL}" \
   INPUT_ISSUER="${INPUT_ISSUER}" \
   OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
 
 # Update OAuth Backend (triggers rollout, picks up updated ConfigMap)
-oc set env deployment/oauth-playground-backend \
+oc set env deployment/nodejs-oauth-playground-backend \
   OTEL_EXPORTER_OTLP_ENDPOINT="${OTEL_ENDPOINT}"
 ```
 
@@ -162,9 +162,9 @@ oc get pods
 oc get routes
 
 # View logs
-oc logs -f deployment/oidc-playground
-oc logs -f deployment/oauth-playground-frontend
-oc logs -f deployment/oauth-playground-backend
+oc logs -f deployment/nodejs-oidc-playground
+oc logs -f deployment/nodejs-oauth-playground-frontend
+oc logs -f deployment/nodejs-oauth-playground-backend
 ```
 
 ---
@@ -174,9 +174,9 @@ oc logs -f deployment/oauth-playground-backend
 Get your application URLs:
 
 ```bash
-echo "OIDC Playground: https://$(oc get route oidc-playground -o jsonpath='{.spec.host}')"
-echo "OAuth Frontend:  https://$(oc get route oauth-playground-frontend -o jsonpath='{.spec.host}')"
-# Note: OAuth Backend has no external route - accessed via frontend proxy
+echo "OIDC Playground: https://$(oc get route nodejs-oidc-playground -o jsonpath='{.spec.host}')"
+echo "OAuth Frontend:  https://$(oc get route nodejs-oauth-playground-frontend -o jsonpath='{.spec.host}')"
+# Note: Node.js OAuth Backend has no external route - accessed via frontend proxy
 ```
 
 ---
