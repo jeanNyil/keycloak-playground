@@ -85,12 +85,17 @@ Both implementations support deployment to OpenShift/Kubernetes with pre-configu
 # Node.js
 cd nodejs
 podman build -t quay.io/<YOUR_USERNAME>/nodejs-oidc-playground:1.0.0 01-OIDC/
+podman push quay.io/<YOUR_USERNAME>/nodejs-oidc-playground:1.0.0
+
 podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 02-Oauth2/frontend/
+podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-frontend:1.0.0
+
 podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0 02-Oauth2/backend/
+podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 
 # Quarkus
-cd quarkus/backend && ./mvnw clean package -Dquarkus.container-image.build=true
-cd quarkus/frontend && ./mvnw clean package -Dquarkus.container-image.build=true
+cd quarkus/backend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
+cd quarkus/frontend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 ```
 
 ### Deploy to OpenShift
