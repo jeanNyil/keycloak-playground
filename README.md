@@ -136,6 +136,9 @@ All applications are instrumented with OpenTelemetry for distributed tracing:
 - **Backend Support**: Grafana Tempo, Jaeger, Zipkin
 
 ### Local Tracing with LGTM Stack
+
+**For Node.js applications:**
+
 ```bash
 # Start Grafana LGTM (Loki, Grafana, Tempo, Mimir)
 docker run -d --name lgtm \
@@ -145,6 +148,19 @@ docker run -d --name lgtm \
   grafana/otel-lgtm:latest
 
 # Access Grafana at http://localhost:3100
+```
+
+**For Quarkus applications:**
+
+Quarkus apps automatically start the LGTM stack as a dev service when running in dev mode (`./mvnw quarkus:dev`). No need to run the Docker image manually!
+
+```bash
+# Start Quarkus app - LGTM starts automatically
+cd quarkus/frontend  # or quarkus/backend
+./mvnw quarkus:dev
+
+# Access Quarkus Dev UI at http://localhost:8080/q/dev-ui
+# The Grafana URL can be discovered from the Dev UI under "Observability"
 ```
 
 Service names for trace queries:
