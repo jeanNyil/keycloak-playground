@@ -11,6 +11,8 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import org.jboss.logging.Logger;
 
+import java.util.Collection;
+
 @Path("/")
 public class OAuthServiceResource {
 
@@ -37,7 +39,15 @@ public class OAuthServiceResource {
         
         // Log token validation details
         if (securityIdentity.getPrincipal() instanceof OidcJwtCallerPrincipal jwtPrincipal) {
-            String audience = jwtPrincipal.getClaim("aud");
+            // Handle audience claim - can be String or Collection
+            Object audClaim = jwtPrincipal.getClaim("aud");
+            String audience;
+            if (audClaim instanceof Collection) {
+                audience = String.join(", ", (Collection<String>) audClaim);
+            } else {
+                audience = (String) audClaim;
+            }
+            
             String issuer = jwtPrincipal.getIssuer();
             
             LOG.infof("GET /secured - Token validation successful");
