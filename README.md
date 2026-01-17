@@ -67,11 +67,11 @@ npm install && npm start
 
 #### Quarkus Playground
 ```bash
-# Backend
+# Backend (on port 8081)
 cd quarkus/backend
-./mvnw quarkus:dev
+./mvnw quarkus:dev -Dquarkus.http.port=8081
 
-# Frontend (in another terminal)
+# Frontend (in another terminal, on port 8080)
 cd quarkus/frontend
 ./mvnw quarkus:dev
 ```
@@ -106,8 +106,8 @@ oc apply -k nodejs/02-Oauth2/backend/_openshift/
 oc apply -k nodejs/02-Oauth2/frontend/_openshift/
 
 # Quarkus
-cd quarkus/backend && ./mvnw clean package -Dquarkus.kubernetes.deploy=true
-cd quarkus/frontend && ./mvnw clean package -Dquarkus.kubernetes.deploy=true
+cd quarkus/backend && ./mvnw clean package -Dquarkus.openshift.deploy=true
+cd quarkus/frontend && ./mvnw clean package -Dquarkus.openshift.deploy=true
 ```
 
 ## 🔐 Keycloak Client Configuration
@@ -192,7 +192,6 @@ Service names for trace queries:
 - **[Node.js README](./nodejs/README.md)** - Complete Node.js implementation guide
 - **[Quarkus README](./quarkus/README.md)** - Quarkus implementation overview
 - **[Quarkus Quick Start](./quarkus/QUICKSTART.md)** - Fast development setup
-- **[Quarkus Implementation Summary](./quarkus/IMPLEMENTATION-SUMMARY.md)** - Technical details
 
 ## 🛠️ Technology Stack
 

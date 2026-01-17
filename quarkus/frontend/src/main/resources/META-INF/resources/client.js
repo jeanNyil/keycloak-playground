@@ -75,17 +75,10 @@ function loadTokens(code) {
         client_id: clientId,
         redirect_uri: document.location.href.split('?')[0]
     };
-
-    console.log('Exchanging authorization code for tokens...');
-    console.log('Token endpoint:', state.discovery['token_endpoint']);
-    console.log('Client ID:', clientId);
     
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {
         if (req.readyState === 4) {
-            console.log('Token exchange response status:', req.status);
-            console.log('Token exchange response text:', req.responseText);
-            
             // Check if response is empty
             if (!req.responseText || req.responseText.trim() === '') {
                 console.error('Empty response from token endpoint');
@@ -110,7 +103,6 @@ function loadTokens(code) {
                     if (response['id_token']) {
                         setState('idToken', response['id_token']);
                     }
-                    console.log('Token exchange successful');
                 } else if (response['error']) {
                     console.error('Token exchange error:', response['error']);
                     setOutput('output-accessToken', 'Error: ' + response['error'] + '\n' + (response['error_description'] || ''));
@@ -120,7 +112,6 @@ function loadTokens(code) {
                 }
             } catch (e) {
                 console.error('Error parsing token response:', e);
-                console.error('Response text was:', req.responseText);
                 setOutput('output-accessToken', 'Error parsing response: ' + e.message + '\n\nResponse status: ' + req.status + '\nResponse text: ' + req.responseText.substring(0, 200));
             }
         }

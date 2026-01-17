@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quarkus-oauth-playground-frontend-config
+data:
+  application.properties: |
+    quarkus.otel.exporter.otlp.endpoint=http://otel-collector:4317
+    quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+    oauth.service.url=http://quarkus-oauth-playground-backend:80

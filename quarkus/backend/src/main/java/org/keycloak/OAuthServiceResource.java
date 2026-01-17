@@ -1,5 +1,6 @@
 package org.keycloak;
 
+import io.quarkus.oidc.runtime.OidcJwtCallerPrincipal;
 import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -33,9 +34,24 @@ public class OAuthServiceResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String securedEndpoint() {
         String username = securityIdentity.getPrincipal().getName();
-        LOG.infof("GET /secured - Secured endpoint accessed by user: %s", username);
-        LOG.infof("  └─ ✓ Access GRANTED to user: %s", username);
-        LOG.infof("  └─ Roles: %s", securityIdentity.getRoles());
+        
+        // Log token validation details
+        if (securityIdentity.getPrincipal() instanceof OidcJwtCallerPrincipal jwtPrincipal) {
+            String audience = jwtPrincipal.getClaim("aud");
+            String issuer = jwtPrincipal.getIssuer();
+            
+            LOG.infof("GET /secured - Token validation successful");
+            LOG.infof("  └─ User: %s", username);
+            LOG.infof("  └─ Issuer: %s", issuer);
+            LOG.infof("  └─ Audience: %s (verified against 'quarkus-oauth-backend')", audience);
+            LOG.infof("  └─ Roles: %s", securityIdentity.getRoles());
+            LOG.infof("  └─ ✓ Access GRANTED - User '%s' has required 'user' role", username);
+        } else {
+            LOG.infof("GET /secured - Secured endpoint accessed by user: %s", username);
+            LOG.infof("  └─ ✓ Access GRANTED - User '%s' has required 'user' role", username);
+            LOG.infof("  └─ User roles: %s", securityIdentity.getRoles());
+        }
+        
         return "Secret message!";
     }
 }

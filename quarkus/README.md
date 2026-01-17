@@ -2,6 +2,44 @@
 
 This is a Quarkus-based implementation of the OAuth 2.0 playground, providing the same functionality as the Node.js version (`nodejs/02-Oauth2`) but using Quarkus framework.
 
+## Prerequisites
+
+1. **Keycloak Server** - Running instance accessible via URL
+2. **Keycloak Clients** - Two clients configured in your realm:
+   - **Frontend**: `quarkus-oauth-playground` (public client, no secret required)
+   - **Backend**: `quarkus-oauth-backend` (confidential client with secret)
+3. **Client Role** - Create a `user` role in the `quarkus-oauth-backend` client
+4. **Test User** - A user with the `quarkus-oauth-backend:user` role assigned
+
+## Configuration
+
+Before running the applications, you must configure your Keycloak settings.
+
+### Backend Configuration
+
+Edit `quarkus/backend/src/main/resources/application.properties`:
+
+```properties
+# Update these values with your Keycloak instance details
+quarkus.oidc.auth-server-url=https://your-keycloak-server/realms/your-realm
+quarkus.oidc.client-id=quarkus-oauth-backend
+quarkus.oidc.credentials.secret=your-backend-client-secret
+```
+
+### Frontend Configuration
+
+Edit `quarkus/frontend/src/main/resources/application.properties`:
+
+```properties
+# Update these values with your Keycloak instance details
+quarkus.oidc.auth-server-url=https://your-keycloak-server/realms/your-realm
+quarkus.oidc.client-id=quarkus-oauth-playground
+# No client secret needed - this is a public client
+oauth.service.url=http://localhost:8081  # Backend URL
+```
+
+**Note**: The frontend client (`quarkus-oauth-playground`) should be configured as a **public client** in Keycloak with **Client authentication: OFF**. Public clients do not use client secrets.
+
 ## Architecture
 
 - **Frontend** (`quarkus/frontend`): Web application with REST API proxy endpoints for distributed tracing
@@ -50,7 +88,7 @@ cd quarkus/backend
 # - quarkus.oidc.credentials.secret
 
 # Run in dev mode
-./mvnw quarkus:dev
+./mvnw quarkus:dev -Dquarkus.http.port=8081
 
 # The backend will start on http://localhost:8081
 ```
@@ -111,36 +149,65 @@ oc project <your-project>
 
 # Deploy backend
 cd quarkus/backend
-./mvnw clean package -Dquarkus.kubernetes.deploy=true
+./mvnw clean package -Dquarkus.openshift.deploy=true
 
 # Deploy frontend
 cd ../frontend
-./mvnw clean package -Dquarkus.kubernetes.deploy=true
+./mvnw clean package -Dquarkus.openshift.deploy=true
 ```
 
-### Post-Deployment Configuration
+### Pre-Deployment Configuration
 
-Update the environment variables in OpenShift:
+Before deploying to OpenShift, configure your Keycloak settings in the `src/main/kubernetes/openshift.yml` files. These files define the ConfigMaps and Secrets that will be created during deployment.
 
-```bash
-# Get the backend service URL (internal K8s service)
-BACKEND_URL="http://quarkus-oauth-playground-backend:8080"
+#### Backend Configuration
 
-# Update backend with your Keycloak settings
-oc set env deployment/quarkus-oauth-playground-backend \
-  QUARKUS_OIDC_AUTH_SERVER_URL="https://sso.apps.example.com/realms/demo" \
-  QUARKUS_OIDC_CLIENT_ID="quarkus-oauth-backend" \
-  QUARKUS_OIDC_CREDENTIALS_SECRET="<your-backend-secret>" \
-  QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4317"
+Edit `quarkus/backend/src/main/kubernetes/openshift.yml`:
 
-# Update frontend with your Keycloak settings and backend URL
-oc set env deployment/quarkus-oauth-playground-frontend \
-  QUARKUS_OIDC_AUTH_SERVER_URL="https://sso.apps.example.com/realms/demo" \
-  QUARKUS_OIDC_CLIENT_ID="quarkus-oauth-playground" \
-  QUARKUS_OIDC_CREDENTIALS_SECRET="<your-frontend-secret>" \
-  OAUTH_SERVICE_URL="${BACKEND_URL}" \
-  QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT="http://otel-collector:4317"
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quarkus-oauth-playground-backend-config
+data:
+  application.properties: |
+    quarkus.otel.exporter.otlp.endpoint=http://otel-collector:4317
+    quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: quarkus-oauth-playground-backend-secret
+stringData:
+  application.properties: |
+    quarkus.oidc.credentials.secret=<your-backend-client-secret>
+type: Opaque
 ```
+
+#### Frontend Configuration
+
+Edit `quarkus/frontend/src/main/kubernetes/openshift.yml`:
+
+```yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: quarkus-oauth-playground-frontend-config
+data:
+  application.properties: |
+    quarkus.otel.exporter.otlp.endpoint=http://otel-collector:4317
+    quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+    oauth.service.url=http://quarkus-oauth-playground-backend:80
+```
+
+**Note**: 
+- Update `quarkus.oidc.auth-server-url` with your Keycloak server URL and realm
+- Update `quarkus.oidc.credentials.secret` in the backend secret with your actual client secret from Keycloak
+- The frontend is a **public client** and does not require a Secret resource
+- The backend service URL uses the internal Kubernetes service name: `http://quarkus-oauth-playground-backend:80`
+- These ConfigMaps and Secrets are automatically deployed with the application
 
 ## OpenTelemetry Tracing
 

@@ -1,21 +1,25 @@
 package org.keycloak;
 
+import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;
+import io.vertx.mutiny.core.Vertx;
+import io.vertx.mutiny.core.buffer.Buffer;
+import io.vertx.mutiny.ext.web.client.HttpResponse;
+import io.vertx.mutiny.ext.web.client.WebClient;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
 import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Map;
 
 @Path("/api")
@@ -29,45 +33,52 @@ public class OAuthProxyResource {
     @ConfigProperty(name = "quarkus.oidc.auth-server-url")
     String keycloakAuthServerUrl;
 
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(10))
-            .build();
+    @Inject
+    @RestClient
+    BackendServiceClient backendClient;
 
-    // Proxy endpoint for Keycloak discovery - enables distributed tracing
+    @Inject
+    Vertx vertx;
+
+    private WebClient webClient;
+
+    @PostConstruct
+    void initialize() {
+        this.webClient = WebClient.create(vertx);
+    }
+
+    // Proxy endpoint for Keycloak discovery - enables distributed tracing with WebClient
     @GET
     @Path("/keycloak/discovery")
     @PermitAll
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getDiscovery(@QueryParam("issuer") String issuer) {
+    public Uni<Response> getDiscovery(@QueryParam("issuer") String issuer) {
         String discoveryUrl = (issuer != null ? issuer : keycloakAuthServerUrl) + "/.well-known/openid-configuration";
         LOG.infof("GET /api/keycloak/discovery → %s", discoveryUrl);
         
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(discoveryUrl))
-                    .GET()
-                    .build();
-                    
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            LOG.info("  └─ ✓ Discovery loaded successfully");
-            return Response.status(response.statusCode())
-                    .entity(response.body())
-                    .build();
-        } catch (Exception e) {
-            LOG.errorf("  └─ ✗ Error fetching discovery: %s", e.getMessage());
-            return Response.status(500)
-                    .entity("{\"error\": \"Error fetching discovery\"}")
-                    .build();
-        }
+        return webClient.getAbs(discoveryUrl)
+                .send()
+                .onItem().transform(response -> {
+                    LOG.info("  └─ ✓ Discovery loaded successfully");
+                    return Response.status(response.statusCode())
+                            .entity(response.bodyAsString())
+                            .build();
+                })
+                .onFailure().recoverWithItem(e -> {
+                    LOG.errorf("  └─ ✗ Error fetching discovery: %s", e.getMessage());
+                    return Response.status(500)
+                            .entity("{\"error\": \"Error fetching discovery\"}")
+                            .build();
+                });
     }
 
-    // Proxy endpoint for Keycloak token exchange - enables distributed tracing
+    // Proxy endpoint for Keycloak token exchange - enables distributed tracing with WebClient
     @POST
     @Path("/keycloak/token")
     @PermitAll
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response exchangeToken(Map<String, String> params) {
+    public Uni<Response> exchangeToken(Map<String, String> params) {
         String tokenEndpoint = params.get("token_endpoint");
         String grantType = params.get("grant_type");
         String code = params.get("code");
@@ -80,45 +91,40 @@ public class OAuthProxyResource {
         LOG.infof("  └─ redirect_uri: %s", redirectUri);
         LOG.infof("  └─ code: %s", code != null ? code.substring(0, Math.min(10, code.length())) + "..." : "null");
         
-        try {
-            String formData = String.format("grant_type=%s&code=%s&client_id=%s&redirect_uri=%s",
-                    URLEncoder.encode(grantType, StandardCharsets.UTF_8),
-                    URLEncoder.encode(code, StandardCharsets.UTF_8),
-                    URLEncoder.encode(clientId, StandardCharsets.UTF_8),
-                    URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
-            
-            LOG.infof("  └─ Form data: %s", formData.replace(code, code.substring(0, Math.min(10, code.length())) + "..."));
+        String formData = String.format("grant_type=%s&code=%s&client_id=%s&redirect_uri=%s",
+                URLEncoder.encode(grantType, StandardCharsets.UTF_8),
+                URLEncoder.encode(code, StandardCharsets.UTF_8),
+                URLEncoder.encode(clientId, StandardCharsets.UTF_8),
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8));
+        
+        LOG.infof("  └─ Form data prepared (length: %d)", formData.length());
+        
+        return webClient.postAbs(tokenEndpoint)
+                .putHeader("Content-Type", "application/x-www-form-urlencoded")
+                .sendBuffer(Buffer.buffer(formData))
+                .onItem().transform(response -> {
+                    LOG.infof("  └─ Response status: %d", response.statusCode());
+                    LOG.infof("  └─ Response body length: %d", response.bodyAsString() != null ? response.bodyAsString().length() : 0);
                     
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(tokenEndpoint))
-                    .header("Content-Type", "application/x-www-form-urlencoded")
-                    .POST(HttpRequest.BodyPublishers.ofString(formData))
-                    .build();
+                    if (response.statusCode() == 200) {
+                        LOG.info("  └─ ✓ Token exchange successful");
+                    } else {
+                        LOG.infof("  └─ ✗ Token exchange failed: %d", response.statusCode());
+                        LOG.infof("  └─ Response body: %s", response.bodyAsString());
+                    }
                     
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            
-            LOG.infof("  └─ Response status: %d", response.statusCode());
-            LOG.infof("  └─ Response body length: %d", response.body() != null ? response.body().length() : 0);
-            
-            if (response.statusCode() == 200) {
-                LOG.info("  └─ ✓ Token exchange successful");
-            } else {
-                LOG.infof("  └─ ✗ Token exchange failed: %d", response.statusCode());
-                LOG.infof("  └─ Response body: %s", response.body());
-            }
-            
-            // Return response with explicit content-type header
-            return Response.status(response.statusCode())
-                    .header("Content-Type", "application/json")
-                    .entity(response.body() != null ? response.body() : "{}")
-                    .build();
-        } catch (Exception e) {
-            LOG.errorf(e, "  └─ ✗ Error exchanging token: %s", e.getMessage());
-            return Response.status(500)
-                    .header("Content-Type", "application/json")
-                    .entity("{\"error\": \"Error exchanging token\", \"message\": \"" + e.getMessage() + "\"}")
-                    .build();
-        }
+                    return Response.status(response.statusCode())
+                            .header("Content-Type", "application/json")
+                            .entity(response.bodyAsString() != null ? response.bodyAsString() : "{}")
+                            .build();
+                })
+                .onFailure().recoverWithItem(e -> {
+                    LOG.errorf(e, "  └─ ✗ Error exchanging token: %s", e.getMessage());
+                    return Response.status(500)
+                            .header("Content-Type", "application/json")
+                            .entity("{\"error\": \"Error exchanging token\", \"message\": \"" + e.getMessage() + "\"}")
+                            .build();
+                });
     }
 
     // Proxy endpoint for Keycloak logout - enables distributed tracing
@@ -143,70 +149,85 @@ public class OAuthProxyResource {
         return Response.seeOther(URI.create(logoutUrl)).build();
     }
 
-    // Proxy endpoint for backend public service - enables distributed tracing
+    // Proxy endpoint for backend public service - enables distributed tracing with Reactive REST Client
     @GET
     @Path("/service/public")
     @PermitAll
     @Produces(MediaType.TEXT_PLAIN)
-    public Response invokePublicService() {
-        String publicUrl = serviceUrl + "/public";
-        LOG.infof("GET /api/service/public → %s", publicUrl);
+    public Uni<Response> invokePublicService() {
+        LOG.info("GET /api/service/public → Proxying to backend /public");
         
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(publicUrl))
-                    .GET()
-                    .build();
-                    
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            String statusIcon = response.statusCode() < 400 ? "✓" : "✗";
-            LOG.infof("  └─ %s Response: %d", statusIcon, response.statusCode());
-            
-            return Response.status(response.statusCode())
-                    .entity(response.body())
-                    .build();
-        } catch (Exception e) {
-            LOG.errorf("  └─ ✗ Error proxying to backend: %s", e.getMessage());
-            return Response.status(500)
-                    .entity("Error connecting to backend service")
-                    .build();
-        }
+        return backendClient.getPublic()
+                .onItem().transform(response -> {
+                    LOG.info("  └─ ✓ Backend responded: 200");
+                    return Response.ok(response).build();
+                })
+                .onFailure(WebApplicationException.class).recoverWithItem(e -> {
+                    WebApplicationException wae = (WebApplicationException) e;
+                    int status = wae.getResponse().getStatus();
+                    String statusIcon = status < 400 ? "✓" : "✗";
+                    LOG.infof("  └─ %s Backend responded: %d", statusIcon, status);
+                    return Response.status(status)
+                            .entity(wae.getMessage())
+                            .build();
+                })
+                .onFailure().recoverWithItem(e -> {
+                    LOG.errorf("  └─ ✗ Error proxying to backend: %s", e.getMessage());
+                    return Response.status(500)
+                            .entity("Error connecting to backend service")
+                            .build();
+                });
     }
 
-    // Proxy endpoint for backend secured service - enables distributed tracing
+    // Proxy endpoint for backend secured service - enables distributed tracing with Reactive REST Client
     @GET
     @Path("/service/secured")
     @PermitAll
     @Produces(MediaType.TEXT_PLAIN)
-    public Response invokeSecuredService(@Context HttpServerRequest serverRequest) {
-        String securedUrl = serviceUrl + "/secured";
+    public Uni<Response> invokeSecuredService(@Context HttpServerRequest serverRequest) {
         String authHeader = serverRequest.getHeader("Authorization");
-        LOG.infof("GET /api/service/secured → %s", securedUrl);
+        LOG.info("GET /api/service/secured → Proxying to backend /secured");
         LOG.infof("  └─ Authorization: %s", authHeader != null ? "Bearer token present" : "missing");
         
-        try {
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(securedUrl))
-                    .GET();
+        return backendClient.getSecured(authHeader)
+                .onItem().transform(response -> {
+                    LOG.info("  └─ ✓ AUTHORIZED: 200 - Access granted (user has required 'user' role)");
+                    return Response.ok(response).build();
+                })
+                .onFailure(WebApplicationException.class).recoverWithItem(e -> {
+                    WebApplicationException wae = (WebApplicationException) e;
+                    int status = wae.getResponse().getStatus();
+                    String statusIcon = status < 400 ? "✓" : "✗";
                     
-            if (authHeader != null) {
-                requestBuilder.header("Authorization", authHeader);
-            }
+                    // Provide user-friendly error messages
+                    String userMessage;
+                    String statusLabel;
                     
-            HttpResponse<String> response = httpClient.send(requestBuilder.build(), 
-                    HttpResponse.BodyHandlers.ofString());
-            String statusIcon = response.statusCode() < 400 ? "✓" : "✗";
-            String statusLabel = response.statusCode() < 400 ? "AUTHORIZED" : "DENIED";
-            LOG.infof("  └─ %s %s: %d", statusIcon, statusLabel, response.statusCode());
-            
-            return Response.status(response.statusCode())
-                    .entity(response.body())
-                    .build();
-        } catch (Exception e) {
-            LOG.errorf("  └─ ✗ Error proxying to backend: %s", e.getMessage());
-            return Response.status(500)
-                    .entity("Error connecting to backend service")
-                    .build();
-        }
+                    if (status == 401) {
+                        statusLabel = "UNAUTHORIZED - Invalid or missing token";
+                        userMessage = "Access denied: Invalid or missing authentication token";
+                    } else if (status == 403) {
+                        statusLabel = "FORBIDDEN - User lacks required 'user' role";
+                        userMessage = "Access denied: User does not have the required 'user' role";
+                    } else if (status >= 500) {
+                        statusLabel = "SERVER ERROR";
+                        userMessage = "Backend service error";
+                    } else {
+                        statusLabel = status < 400 ? "AUTHORIZED" : "DENIED";
+                        userMessage = "Access denied";
+                    }
+                    
+                    LOG.infof("  └─ %s %s: %d", statusIcon, statusLabel, status);
+                    
+                    return Response.status(status)
+                            .entity(userMessage)
+                            .build();
+                })
+                .onFailure().recoverWithItem(e -> {
+                    LOG.errorf("  └─ ✗ Error proxying to backend: %s", e.getMessage());
+                    return Response.status(500)
+                            .entity("Error connecting to backend service")
+                            .build();
+                });
     }
 }

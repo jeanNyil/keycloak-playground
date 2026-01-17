@@ -22,9 +22,10 @@
 ### Create Frontend Client
 1. Create another client
 2. **Client ID**: `quarkus-oauth-playground`
-3. **Client authentication**: OFF (public)
+3. **Client authentication**: **OFF** (public client - no secret needed)
 4. **Valid Redirect URIs**: `http://localhost:8080/*`
 5. **Web Origins**: `*`
+6. **Save**
 
 ### Assign Role to User
 1. Go to **Users** → Select your test user
@@ -34,21 +35,26 @@
 
 ## Step 2: Configure Backend
 
-```bash
-cd quarkus/backend
-```
-
 Edit `src/main/resources/application.properties`:
 
 ```properties
-quarkus.oidc.auth-server-url=https://YOUR_KEYCLOAK_URL/realms/YOUR_REALM
+# Update with your Keycloak details
+quarkus.oidc.auth-server-url=https://your-keycloak-server/realms/your-realm
 quarkus.oidc.client-id=quarkus-oauth-backend
-quarkus.oidc.credentials.secret=YOUR_BACKEND_CLIENT_SECRET
+quarkus.oidc.credentials.secret=<paste-your-backend-secret-here>
+```
+
+**Example:**
+```properties
+quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+quarkus.oidc.client-id=quarkus-oauth-backend
+quarkus.oidc.credentials.secret=3a2b1c4d5e6f7g8h9i0j
 ```
 
 Start the backend:
 
 ```bash
+cd quarkus/backend
 ./mvnw quarkus:dev -Dquarkus.http.port=8081
 ```
 
@@ -67,9 +73,18 @@ cd quarkus/frontend
 Edit `src/main/resources/application.properties`:
 
 ```properties
-quarkus.oidc.auth-server-url=https://YOUR_KEYCLOAK_URL/realms/YOUR_REALM
+# Update with your Keycloak details (same auth-server-url as backend)
+quarkus.oidc.auth-server-url=https://your-keycloak-server/realms/your-realm
 quarkus.oidc.client-id=quarkus-oauth-playground
-quarkus.oidc.credentials.secret=YOUR_FRONTEND_CLIENT_SECRET
+# No client secret needed - this is a public client
+oauth.service.url=http://localhost:8081
+```
+
+**Example:**
+```properties
+quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+quarkus.oidc.client-id=quarkus-oauth-playground
+# Public client - no secret
 oauth.service.url=http://localhost:8081
 ```
 
@@ -219,6 +234,6 @@ You now have a fully functional OAuth 2.0 playground running with:
 
 ## Next Steps
 
-- Check out the full [README.md](README.md) for deployment options
-- Review [IMPLEMENTATION-SUMMARY.md](IMPLEMENTATION-SUMMARY.md) for technical details
+- Check out the full [README.md](README.md) for deployment options and detailed configuration
 - Deploy to OpenShift using the Quarkus extension
+- Explore OpenTelemetry tracing with LGTM stack
