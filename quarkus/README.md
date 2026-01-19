@@ -123,14 +123,53 @@ Access the playground at `http://localhost:8080`
 ### Backend
 ```bash
 cd quarkus/backend
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
+>**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./backend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+
+You can then execute your native executable with: `./target/quarkus-oauth-playground-backend-1.0.0-SNAPSHOT-runner`
+
+>**NOTE** : If your are on Apple Silicon and built the native image inside a Linux container (-Dquarkus.native.container-build=true), the result is a Linux ELF binary. macOS can’t execute Linux binaries, so launching it on macOS yields “exec format error”. Follow the steps below to run your Linux native binary.
+> 
+> 1. Build the container image of your Linux native binary:
+>     ```bash
+>     podman build -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-backend .
+>     ```
+> 2. Run the container:
+>     ```bash
+>     podman run --rm --name quarkus-oauth-playground-backend \
+>     -p 8081:8080 \
+>     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+>     -e QUARKUS_OIDC_CREDENTIALS_SECRET=ihqZiCLvTse1advVzPT15s1Gev3XFS93 \
+>     -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
+>     quarkus-oauth-playground-backend
+>     ```
 
 ### Frontend
 ```bash
 cd quarkus/frontend
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
+
+>**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./frontend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+
+You can then execute your native executable with: `./target/quarkus-oauth-playground-frontend-1.0.0-SNAPSHOT-runner`
+
+>**NOTE** : If your are on Apple Silicon and built the native image inside a Linux container (-Dquarkus.native.container-build=true), the result is a Linux ELF binary. macOS can’t execute Linux binaries, so launching it on macOS yields “exec format error”. Follow the steps below to run your Linux native binary.
+> 
+> 1. Build the container image of your Linux native binary:
+>     ```bash
+>     podman build -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-frontend .
+>     ```
+> 2. Run the container:
+>     ```bash
+>     podman run --rm --name quarkus-oauth-playground-frontend \
+>     -p 8080:8080 \
+>     -e OAUTH_SERVICE_URL=http://host.containers.internal:8081 \
+>     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+>     -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
+>     quarkus-oauth-playground-frontend
+>     ```
 
 ## Deploy to OpenShift
 
