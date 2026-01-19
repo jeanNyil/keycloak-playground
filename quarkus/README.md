@@ -49,7 +49,7 @@ oauth.service.url=http://localhost:8081  # Backend URL
   
 - **Backend** (`quarkus/backend`): Service with secured and public endpoints
   - Public endpoint: `/public` (no authentication)
-  - Secured endpoint: `/secured` (requires `quarkus-backend:user` role)
+  - Secured endpoint: `/secured` (requires `quarkus-oauth-backend:user` role)
   - Token validation via Quarkus OIDC
   - OpenTelemetry instrumentation for tracing
 
@@ -95,7 +95,7 @@ cd quarkus/backend
 
 Endpoints:
 - `GET /public` - Public message (no auth required)
-- `GET /secured` - Secret message (requires `quarkus-backend:user` role)
+- `GET /secured` - Secret message (requires `quarkus-oauth-backend:user` role)
 - `GET /q/health/live` - Liveness probe (SmallRye Health)
 - `GET /q/health/ready` - Readiness probe (SmallRye Health)
 

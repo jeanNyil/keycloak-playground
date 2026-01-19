@@ -142,7 +142,7 @@ function invokePublicService() {
     req.send();
 }
 
-// Invoke the secured endpoint (requires quarkus-backend:user role)
+// Invoke the secured endpoint (requires quarkus-oauthbackend:user role)
 function invokeSecuredService() {
     var req = new XMLHttpRequest();
     req.onreadystatechange = function() {

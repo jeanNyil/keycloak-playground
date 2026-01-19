@@ -209,7 +209,7 @@ Both apps automatically start with the Grafana LGTM stack in dev mode:
 **Backend** `application.properties`:
 ```properties
 quarkus.oidc.auth-server-url=https://sso.example.com/realms/demo
-quarkus.oidc.client-id=quarkus-backend
+quarkus.oidc.client-id=quarkus-oauth-backend
 quarkus.oidc.credentials.secret=abc123-your-secret-here
 ```
 
