@@ -34,7 +34,7 @@ Modern cloud-native implementation using Quarkus framework:
 - OpenTelemetry tracing with LGTM stack support
 - Fast startup and low memory footprint
 
-📖 **[Quarkus Documentation](./quarkus/README.md)**
+📖 **[Quarkus Documentation](./quarkus/02-Oauth2/README.md)**
 
 ## 🚀 Quick Start
 
@@ -206,8 +206,8 @@ Service names for trace queries:
 ## 📚 Documentation
 
 - **[Node.js README](./nodejs/README.md)** - Complete Node.js implementation guide
-- **[Quarkus README](./quarkus/README.md)** - Quarkus implementation overview
-- **[Quarkus Quick Start](./quarkus/QUICKSTART.md)** - Fast development setup
+- **[Quarkus README](./quarkus/02-Oauth2/README.md)** - Quarkus implementation overview
+- **[Quarkus Quick Start](./quarkus/02-Oauth2/QUICKSTART.md)** - Fast development setup
 
 ## 🛠️ Technology Stack
 
