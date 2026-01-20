@@ -17,7 +17,7 @@ Before running the applications, you must configure your Keycloak settings.
 
 ### Backend Configuration
 
-Edit `quarkus/backend/src/main/resources/application.properties`:
+Edit `quarkus/02-Oauth2/backend/src/main/resources/application.properties`:
 
 ```properties
 # Update these values with your Keycloak instance details
@@ -28,7 +28,7 @@ quarkus.oidc.credentials.secret=your-backend-client-secret
 
 ### Frontend Configuration
 
-Edit `quarkus/frontend/src/main/resources/application.properties`:
+Edit `quarkus/02-Oauth2/frontend/src/main/resources/application.properties`:
 
 ```properties
 # Update these values with your Keycloak instance details
@@ -80,7 +80,7 @@ You need a Keycloak realm configured with:
 ### Backend
 
 ```bash
-cd quarkus/backend
+cd quarkus/02-Oauth2/backend
 
 # Update application.properties with your Keycloak settings
 # - quarkus.oidc.auth-server-url
@@ -102,7 +102,7 @@ Endpoints:
 ### Frontend
 
 ```bash
-cd quarkus/frontend
+cd quarkus/02-Oauth2/frontend
 
 # Update application.properties with your settings
 # - quarkus.oidc.auth-server-url
@@ -122,10 +122,10 @@ Access the playground at `http://localhost:8080`
 
 ### Backend
 ```bash
-cd quarkus/backend
+cd quarkus/02-Oauth2/backend
 ./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
->**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./backend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+>**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./02-Oauth2/backend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
 
 You can then execute your native executable with: `./target/quarkus-oauth-playground-backend-1.0.0-SNAPSHOT-runner`
 
@@ -147,11 +147,11 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 
 ### Frontend
 ```bash
-cd quarkus/frontend
+cd quarkus/02-Oauth2/frontend
 ./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
 
->**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./frontend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+>**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./02-Oauth2/frontend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
 
 You can then execute your native executable with: `./target/quarkus-oauth-playground-frontend-1.0.0-SNAPSHOT-runner`
 
@@ -187,7 +187,7 @@ oc login <your-cluster-url>
 oc project <your-project>
 
 # Deploy backend
-cd quarkus/backend
+cd quarkus/02-Oauth2/backend
 ./mvnw clean package -Dquarkus.openshift.deploy=true
 
 # Deploy frontend
@@ -201,7 +201,7 @@ Before deploying to OpenShift, configure your Keycloak settings in the `src/main
 
 #### Backend Configuration
 
-Edit `quarkus/backend/src/main/kubernetes/openshift.yml`:
+Edit `quarkus/02-Oauth2/backend/src/main/kubernetes/openshift.yml`:
 
 ```yaml
 ---
@@ -226,7 +226,7 @@ type: Opaque
 
 #### Frontend Configuration
 
-Edit `quarkus/frontend/src/main/kubernetes/openshift.yml`:
+Edit `quarkus/02-Oauth2/frontend/src/main/kubernetes/openshift.yml`:
 
 ```yaml
 ---

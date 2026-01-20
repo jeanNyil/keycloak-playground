@@ -54,7 +54,7 @@ quarkus.oidc.credentials.secret=3a2b1c4d5e6f7g8h9i0j
 Start the backend:
 
 ```bash
-cd quarkus/backend
+cd quarkus/02-Oauth2/backend
 ./mvnw quarkus:dev -Dquarkus.http.port=8081
 ```
 
@@ -67,7 +67,7 @@ cd quarkus/backend
 Open a new terminal:
 
 ```bash
-cd quarkus/frontend
+cd quarkus/02-Oauth2/frontend
 ```
 
 Edit `src/main/resources/application.properties`:

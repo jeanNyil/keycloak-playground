@@ -5,8 +5,8 @@ metadata:
   name: quarkus-oauth-playground-backend-config
 data:
   application.properties: |
-    quarkus.otel.exporter.otlp.endpoint=http://otel-collector:4317
-    quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+    quarkus.otel.exporter.otlp.endpoint=http://otel-collector.observability.svc:4317
+    quarkus.oidc.auth-server-url=https://sso.apps.ocp4.jnyilimb.eu/realms/demo
 ---
 apiVersion: v1
 kind: Secret
@@ -14,5 +14,5 @@ metadata:
   name: quarkus-oauth-playground-backend-secret
 stringData:
   application.properties: |
-    quarkus.oidc.credentials.secret=<YOUR_BACKEND_CLIENT_SECRET>
+    quarkus.oidc.credentials.secret=ihqZiCLvTse1advVzPT15s1Gev3XFS93
 type: Opaque

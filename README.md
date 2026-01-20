@@ -68,11 +68,11 @@ npm install && npm start
 #### Quarkus Playground
 ```bash
 # Backend (on port 8081)
-cd quarkus/backend
+cd quarkus/02-Oauth2/backend
 ./mvnw quarkus:dev -Dquarkus.http.port=8081
 
 # Frontend (in another terminal, on port 8080)
-cd quarkus/frontend
+cd quarkus/02-Oauth2/frontend
 ./mvnw quarkus:dev
 ```
 
@@ -94,8 +94,8 @@ podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0 02
 podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 
 # Quarkus
-cd quarkus/backend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
-cd quarkus/frontend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
+cd quarkus/02-Oauth2/backend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
+cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 ```
 
 ### Deploy to OpenShift
@@ -106,8 +106,8 @@ oc apply -k nodejs/02-Oauth2/backend/_openshift/
 oc apply -k nodejs/02-Oauth2/frontend/_openshift/
 
 # Quarkus
-cd quarkus/backend && ./mvnw clean package -Dquarkus.openshift.deploy=true
-cd quarkus/frontend && ./mvnw clean package -Dquarkus.openshift.deploy=true
+cd quarkus/02-Oauth2/backend && ./mvnw clean package -Dquarkus.openshift.deploy=true
+cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.openshift.deploy=true
 ```
 
 ## 🔐 Keycloak Client Configuration
@@ -156,7 +156,7 @@ Quarkus apps automatically start the LGTM stack as a dev service when running in
 
 ```bash
 # Start Quarkus app - LGTM starts automatically
-cd quarkus/frontend  # or quarkus/backend
+cd quarkus/02-Oauth2/frontend  # or quarkus/02-Oauth2/backend
 ./mvnw quarkus:dev
 
 # Access Quarkus Dev UI at http://localhost:8080/q/dev-ui
