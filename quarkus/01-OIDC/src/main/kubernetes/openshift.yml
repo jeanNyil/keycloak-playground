@@ -6,5 +6,5 @@ metadata:
 data:
   application.properties: |
     quarkus.otel.exporter.otlp.endpoint=http://otel-collector.observability.svc:4317
-    keycloak.url=https://sso.apps.ocp4.jnyilimb.eu
-    keycloak.issuer=https://sso.apps.ocp4.jnyilimb.eu/realms/demo
+    keycloak.url=https://sso.apps.example.com
+    keycloak.issuer=https://sso.apps.example.com/realms/demo

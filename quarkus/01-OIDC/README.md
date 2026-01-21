@@ -27,7 +27,7 @@ This is a Quarkus-based implementation that provides the same functionality as t
    - Valid Redirect URIs:
      - For local dev: `http://localhost:8080/*`
      - For OpenShift: `https://<your-openshift-route>/*`
-     - Example: `https://quarkus-oidc-playground-rhbk-playground.apps.ocp4.jnyilimb.eu/*`
+     - Example: `https://quarkus-oidc-playground.apps.example.com/*`
    - Web Origins: `*` or specific origins (e.g., `https://<your-openshift-route>`)
 
 ## Configuration
@@ -140,7 +140,7 @@ https://<route-from-above>/*
 
 For example:
 ```
-https://quarkus-oidc-playground-rhbk-playground.apps.ocp4.jnyilimb.eu/*
+https://quarkus-oidc-playground.apps.example.com/*
 ```
 
 ## How to Use

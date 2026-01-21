@@ -52,7 +52,7 @@ A configured realm with the following:
 
 ## Build and Push Container Images
 
-> **Note**: Pre-built images are available at `quay.io/jnyilimbibi` and can be used directly for deployment. If you want to build your own images, replace `<YOUR_QUAY_USERNAME>` with your Quay.io username or container registry organization name.
+> **Note**: Pre-built images are available at `quay.io/<YOUR_REGISTRY>` and can be used directly for deployment. If you want to build your own images, replace `<YOUR_QUAY_USERNAME>` with your Quay.io username or container registry organization name.
 
 ```bash
 # Login to Quay.io
@@ -75,9 +75,9 @@ podman push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 ```
 
 > **Important**: If you built custom images with your own Quay username, you must update the image references in the OpenShift deployment manifests before deploying:
-> - `01-OIDC/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/nodejs-oidc-playground:1.0.0`
-> - `02-Oauth2/frontend/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/nodejs-oauth-playground-frontend:1.0.0`
-> - `02-Oauth2/backend/_openshift/deployment.yaml` - Line with `image: quay.io/jnyilimbibi/nodejs-oauth-playground-backend:1.0.0`
+> - `01-OIDC/_openshift/deployment.yaml` - Line with `image: quay.io/<YOUR_REGISTRY>/nodejs-oidc-playground:1.0.0`
+> - `02-Oauth2/frontend/_openshift/deployment.yaml` - Line with `image: quay.io/<YOUR_REGISTRY>/nodejs-oauth-playground-frontend:1.0.0`
+> - `02-Oauth2/backend/_openshift/deployment.yaml` - Line with `image: quay.io/<YOUR_REGISTRY>/nodejs-oauth-playground-backend:1.0.0`
 
 ---
 
@@ -140,9 +140,9 @@ oc set env deployment/nodejs-oauth-playground-backend \
 **Example with actual values:**
 
 ```bash
-# Example: Using a Keycloak instance at sso.apps.ocp4.jnyilimb.eu
+# Example: Using a Keycloak instance at sso.apps.example.com
 KC_REALM="demo"
-KC_URL="https://sso.apps.ocp4.jnyilimb.eu/"
+KC_URL="https://sso.apps.example.com/"
 INPUT_ISSUER="${KC_URL}realms/${KC_REALM}"
 OTEL_ENDPOINT="http://otel-collector.observability.svc:4317"
 

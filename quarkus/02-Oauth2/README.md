@@ -142,8 +142,8 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 >     ```bash
 >     podman run --rm --name quarkus-oauth-playground-backend \
 >     -p 8081:8080 \
->     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
->     -e QUARKUS_OIDC_CREDENTIALS_SECRET=ihqZiCLvTse1advVzPT15s1Gev3XFS93 \
+>     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.example.com/realms/demo \
+>     -e QUARKUS_OIDC_CREDENTIALS_SECRET=your-client-secret-here \
 >     -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
 >     quarkus-oauth-playground-backend
 >     ```
@@ -171,7 +171,7 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 >     podman run --rm --name quarkus-oauth-playground-frontend \
 >     -p 8080:8080 \
 >     -e OAUTH_SERVICE_URL=http://host.containers.internal:8081 \
->     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.ocp4.jnyilimb.eu/realms/demo \
+>     -e QUARKUS_OIDC_AUTH-SERVER-URL=https://sso.apps.example.com/realms/demo \
 >     -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
 >     quarkus-oauth-playground-frontend
 >     ```
