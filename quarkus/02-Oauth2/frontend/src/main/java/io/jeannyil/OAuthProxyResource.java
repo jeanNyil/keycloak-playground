@@ -29,7 +29,7 @@ public class OAuthProxyResource {
     @ConfigProperty(name = "oauth.service.url", defaultValue = "http://localhost:8081")
     String serviceUrl;
 
-    @ConfigProperty(name = "quarkus.oidc.auth-server-url")
+    @ConfigProperty(name = "quarkus.oidc.auth-server-url", defaultValue = "http://localhost:8080/realms/demo")
     String keycloakAuthServerUrl;
 
     @Inject
@@ -44,6 +44,14 @@ public class OAuthProxyResource {
     @PostConstruct
     void initialize() {
         this.webClient = WebClient.create(vertx);
+    }
+
+    @GET
+    @Path("/config")
+    @PermitAll
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getConfig() {
+        return Response.ok(Map.of("issuer", keycloakAuthServerUrl)).build();
     }
 
     // Proxy endpoint for Keycloak discovery - enables distributed tracing with WebClient

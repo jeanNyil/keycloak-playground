@@ -281,6 +281,18 @@ function base64UrlDecode(input) {
 }
 
 function init() {
+    // Load issuer from configuration
+    fetch('/api/config')
+        .then(response => response.json())
+        .then(config => {
+            document.getElementById('input-issuer').value = config.issuer;
+        })
+        .catch(error => {
+            console.error('Failed to load configuration:', error);
+            // Fallback to default if config loading fails
+            document.getElementById('input-issuer').value = 'http://localhost:8080/realms/demo';
+        });
+
     // Check for authorization code or error first
     var code = getQueryVariable('code');
     var error = getQueryVariable('error');

@@ -310,6 +310,7 @@ Quarkus includes dev services that automatically start the Grafana LGTM stack wh
 - ✅ Public and secured endpoint testing
 - ✅ Logout functionality
 - ✅ Distributed tracing via proxy endpoints
+- ✅ Dynamic issuer configuration loaded from `quarkus.oidc.auth-server-url`
 
 ### Backend Features
 - ✅ Public endpoint (no authentication)
