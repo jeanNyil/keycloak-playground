@@ -81,6 +81,8 @@ Quarkus automatically starts the Grafana LGTM stack when running in dev mode:
 
 >**NOTE**: The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in `application.properties`. Adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
 
+>**IMPORTANT**: Native image builds require SSL support for HTTPS calls to Keycloak. This is automatically enabled via `quarkus.ssl.native=true` in `application.properties` (adds `--enable-url-protocols=http,https` to the native-image build).
+
 You can then execute your native executable with: `./target/quarkus-oidc-playground-1.0.0-SNAPSHOT-runner`
 
 >**NOTE**: If you're on Apple Silicon and built the native image inside a Linux container, the result is a Linux ELF binary. macOS can't execute Linux binaries, so you'll get "exec format error". Build and run the container image instead:
@@ -210,6 +212,23 @@ The application is instrumented with OpenTelemetry for distributed tracing:
 All proxy endpoints (`/api/keycloak/*` and `/api/config`) are automatically traced, enabling end-to-end visibility of OIDC flows.
 
 ## Troubleshooting
+
+### Native Image: URL Protocol Not Enabled
+
+If you see this error in native mode:
+```
+java.net.MalformedURLException: Accessing a URL protocol that was not enabled. 
+The URL protocol https is supported but not enabled by default.
+```
+
+**Solution**: Add to `application.properties`:
+```properties
+quarkus.ssl.native=true
+```
+
+This property tells Quarkus to enable SSL support in the native image by adding `--enable-url-protocols=http,https` to the GraalVM native-image build command. This is already configured in the project.
+
+For more details, see the [Quarkus Native and SSL guide](https://quarkus.io/version/3.27/guides/native-and-ssl).
 
 ### Invalid Redirect URI Error
 
