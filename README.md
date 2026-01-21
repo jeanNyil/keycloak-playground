@@ -24,17 +24,21 @@ Traditional Node.js/Express implementations with OpenTelemetry tracing:
 ### Quarkus Implementation
 Modern cloud-native implementation using Quarkus framework:
 
-- **[Quarkus OAuth Playground](./quarkus)** - OAuth 2.0 playground built with Quarkus, OIDC extension, and SmallRye Health
+- **[Quarkus OIDC Playground](./quarkus/01-OIDC)** - Interactive OpenID Connect flow demonstration with reactive Vert.x WebClient
+- **[Quarkus OAuth 2.0 Playground](./quarkus/02-Oauth2)** - OAuth 2.0 playground with frontend/backend separation using OIDC extension
 
 **Key Features:**
-- Native OAuth 2.0 flow implementation
-- Built-in OIDC authentication
-- SmallRye Health checks for Kubernetes
+- Native OIDC and OAuth 2.0 flow implementations
+- Built-in OIDC authentication and token validation
+- SmallRye Health checks for Kubernetes/OpenShift
 - Micrometer metrics integration
 - OpenTelemetry tracing with LGTM stack support
 - Fast startup and low memory footprint
+- Native image compilation support
 
-📖 **[Quarkus Documentation](./quarkus/02-Oauth2/README.md)**
+📖 **[Quarkus Documentation](./quarkus/README.md)** - Complete Quarkus implementation guide
+📖 **[Quarkus 01-OIDC README](./quarkus/01-OIDC/README.md)** - OIDC playground details
+📖 **[Quarkus 02-OAuth2 README](./quarkus/02-Oauth2/README.md)** - OAuth 2.0 playground details
 
 ## 🚀 Quick Start
 
@@ -65,13 +69,17 @@ cd nodejs/02-Oauth2/frontend
 npm install && npm start
 ```
 
-#### Quarkus Playground
+#### Quarkus Playgrounds
 ```bash
-# Backend (on port 8081)
+# OIDC Playground (on port 8080)
+cd quarkus/01-OIDC
+./mvnw quarkus:dev
+
+# OAuth 2.0 Backend (on port 8081)
 cd quarkus/02-Oauth2/backend
 ./mvnw quarkus:dev -Dquarkus.http.port=8081
 
-# Frontend (in another terminal, on port 8080)
+# OAuth 2.0 Frontend (in another terminal, on port 8080)
 cd quarkus/02-Oauth2/frontend
 ./mvnw quarkus:dev
 ```
@@ -94,6 +102,7 @@ podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0 02
 podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 
 # Quarkus
+cd quarkus/01-OIDC && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 cd quarkus/02-Oauth2/backend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.container-image.build=true -Dquarkus.container-image.push=true
 ```
@@ -106,6 +115,7 @@ oc apply -k nodejs/02-Oauth2/backend/_openshift/
 oc apply -k nodejs/02-Oauth2/frontend/_openshift/
 
 # Quarkus
+cd quarkus/01-OIDC && ./mvnw clean package -Dquarkus.openshift.deploy=true
 cd quarkus/02-Oauth2/backend && ./mvnw clean package -Dquarkus.openshift.deploy=true
 cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.openshift.deploy=true
 ```
@@ -122,6 +132,7 @@ cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.openshift.deploy
 ### Quarkus Clients
 | Client ID | Type | Purpose |
 |-----------|------|---------|
+| `quarkus-oidc-playground` | Public | OIDC flow demonstration |
 | `quarkus-oauth-playground` | Public | OAuth frontend |
 | `quarkus-oauth-backend` | Confidential | OAuth backend service |
 
@@ -167,6 +178,7 @@ Service names for trace queries:
 - `nodejs-oidc-playground`
 - `nodejs-oauth-playground-frontend`
 - `nodejs-oauth-playground-backend`
+- `quarkus-oidc-playground`
 - `quarkus-oauth-playground-frontend`
 - `quarkus-oauth-playground-backend`
 
@@ -206,7 +218,9 @@ Service names for trace queries:
 ## 📚 Documentation
 
 - **[Node.js README](./nodejs/README.md)** - Complete Node.js implementation guide
-- **[Quarkus README](./quarkus/02-Oauth2/README.md)** - Quarkus implementation overview
+- **[Quarkus README](./quarkus/README.md)** - Complete Quarkus implementation guide
+- **[Quarkus 01-OIDC README](./quarkus/01-OIDC/README.md)** - Quarkus OIDC playground guide
+- **[Quarkus 02-OAuth2 README](./quarkus/02-Oauth2/README.md)** - Quarkus OAuth 2.0 implementation overview
 - **[Quarkus Quick Start](./quarkus/02-Oauth2/QUICKSTART.md)** - Fast development setup
 
 ## 🛠️ Technology Stack

@@ -1,7 +1,9 @@
-# Keycloak PlayGround
+# Keycloak Playground - Node.js Implementation
+
+Node.js/Express implementations of OIDC and OAuth 2.0 playgrounds with OpenTelemetry tracing.
 
 - [OpenID Connect Playground](./01-OIDC/README.md)
-- [OAuth 2 Playground](./02-Oauth2/README.md)
+- [OAuth 2.0 Playground](./02-Oauth2/README.md)
 
 ---
 
