@@ -1,4 +1,4 @@
-package org.keycloak;
+package io.jeannyil;
 
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.http.HttpServerRequest;

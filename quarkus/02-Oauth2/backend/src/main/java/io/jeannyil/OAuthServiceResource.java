@@ -1,4 +1,4 @@
-package org.keycloak;
+package io.jeannyil;
 
 import io.quarkus.oidc.runtime.OidcJwtCallerPrincipal;
 import io.quarkus.security.identity.SecurityIdentity;

@@ -1,4 +1,4 @@
-package org.keycloak;
+package io.jeannyil;
 
 import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.*;

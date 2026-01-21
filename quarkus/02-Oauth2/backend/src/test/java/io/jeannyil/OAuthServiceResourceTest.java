@@ -1,4 +1,4 @@
-package org.keycloak;
+package io.jeannyil;
 
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;

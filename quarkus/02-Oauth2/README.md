@@ -125,7 +125,10 @@ Access the playground at `http://localhost:8080`
 cd quarkus/02-Oauth2/backend
 ./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
->**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./02-Oauth2/backend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+
+>**NOTE**: The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./backend/src/main/resources/application.properties). Adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+
+>**SSL SUPPORT**: SSL support is automatically enabled because this project uses the `quarkus-oidc` extension, which enables `--enable-url-protocols=http,https` by default.
 
 You can then execute your native executable with: `./target/quarkus-oauth-playground-backend-1.0.0-SNAPSHOT-runner`
 
@@ -151,7 +154,9 @@ cd quarkus/02-Oauth2/frontend
 ./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
 ```
 
->**NOTE** : The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./02-Oauth2/frontend/src/main/resources/application.properties). Also, adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+>**NOTE**: The project is configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in the [`application.properties`](./frontend/src/main/resources/application.properties). Adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
+
+>**SSL SUPPORT**: SSL support is automatically enabled because this project uses the `quarkus-oidc` extension, which enables `--enable-url-protocols=http,https` by default.
 
 You can then execute your native executable with: `./target/quarkus-oauth-playground-frontend-1.0.0-SNAPSHOT-runner`
 
