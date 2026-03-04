@@ -178,28 +178,6 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 
 ## Deploy to OpenShift
 
-### Using Quarkus OpenShift Extension
-
-The applications include the Quarkus OpenShift extension which can build and deploy directly to OpenShift.
-
-**Note**: OpenShift will automatically configure liveness and readiness probes using SmallRye Health endpoints (`/q/health/live` and `/q/health/ready`). No manual probe configuration is needed.
-
-```bash
-# Login to OpenShift
-oc login <your-cluster-url>
-
-# Create or switch to your project
-oc project <your-project>
-
-# Deploy backend
-cd quarkus/02-Oauth2/backend
-./mvnw clean package -Dquarkus.openshift.deploy=true
-
-# Deploy frontend
-cd ../frontend
-./mvnw clean package -Dquarkus.openshift.deploy=true
-```
-
 ### Pre-Deployment Configuration
 
 Before deploying to OpenShift, configure your Keycloak settings in the `src/main/kubernetes/openshift.yml` files. These files define the ConfigMaps and Secrets that will be created during deployment.
@@ -252,6 +230,28 @@ data:
 - The frontend is a **public client** and does not require a Secret resource
 - The backend service URL uses the internal Kubernetes service name: `http://quarkus-oauth-playground-backend:80`
 - These ConfigMaps and Secrets are automatically deployed with the application
+
+### Using Quarkus OpenShift Extension
+
+The applications include the Quarkus OpenShift extension which can build and deploy directly to OpenShift.
+
+**Note**: OpenShift will automatically configure liveness and readiness probes using SmallRye Health endpoints (`/q/health/live` and `/q/health/ready`). No manual probe configuration is needed.
+
+```bash
+# Login to OpenShift
+oc login <your-cluster-url>
+
+# Create or switch to your project
+oc project <your-project>
+
+# Deploy backend
+cd quarkus/02-Oauth2/backend
+./mvnw clean package -Dquarkus.openshift.deploy=true
+
+# Deploy frontend
+cd ../frontend
+./mvnw clean package -Dquarkus.openshift.deploy=true
+```
 
 ## OpenTelemetry Tracing
 
