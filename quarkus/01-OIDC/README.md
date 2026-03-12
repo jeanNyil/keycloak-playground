@@ -170,6 +170,34 @@ https://quarkus-oidc-playground.apps.example.com/*
 1. Click "Load UserInfo" to retrieve user information
 2. View the user profile data from Keycloak
 
+## Reset vs Logout
+
+The playground provides two buttons to restart the flow:
+
+| Aspect | Reset | Logout |
+|--------|-------|--------|
+| **Local State** | Clears localStorage | Clears localStorage |
+| **Keycloak Session** | Keeps SSO session active | Terminates SSO session |
+| **Browser Cookies** | Keeps Keycloak cookies | Keycloak clears its cookies |
+| **Network Call** | None | Calls `end_session_endpoint` |
+
+### When to Use Each
+
+| Use Case | Button |
+|----------|--------|
+| Start over but stay logged in | **Reset** |
+| Test the full login flow again | **Logout** |
+| Switch to a different user | **Logout** |
+| Clear UI state only | **Reset** |
+
+### Behavior Difference
+
+- **Reset**: App restarts at Discovery step. If you send a new authentication request, you will be **automatically logged in** (no password prompt) because the Keycloak SSO session is still active.
+
+- **Logout**: App restarts at Discovery step. If you send a new authentication request, the **Keycloak login page appears** because the SSO session has been terminated.
+
+>**NOTE**: Logout calls Keycloak's `end_session_endpoint` with an `id_token_hint` parameter. The `id_token` is only issued when authenticating with the `openid` scope (OIDC). If no `id_token` is available (e.g., the token exchange was not completed), the playground will show a warning, clear local state, and skip the Keycloak logout call.
+
 ## Comparison with Node.js Version
 
 | Feature | Node.js (`nodejs/01-OIDC`) | Quarkus |

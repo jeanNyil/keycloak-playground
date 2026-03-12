@@ -312,6 +312,34 @@ Quarkus includes dev services that automatically start the Grafana LGTM stack wh
 - ✅ Distributed tracing via proxy endpoints
 - ✅ Dynamic issuer configuration loaded from `quarkus.oidc.auth-server-url`
 
+## Reset vs Logout
+
+The playground provides two buttons to restart the flow:
+
+| Aspect | Reset | Logout |
+|--------|-------|--------|
+| **Local State** | Clears localStorage | Clears localStorage |
+| **Keycloak Session** | Keeps SSO session active | Terminates SSO session |
+| **Browser Cookies** | Keeps Keycloak cookies | Keycloak clears its cookies |
+| **Network Call** | None | Calls `end_session_endpoint` |
+
+### When to Use Each
+
+| Use Case | Button |
+|----------|--------|
+| Start over but stay logged in | **Reset** |
+| Test the full login flow again | **Logout** |
+| Switch to a different user | **Logout** |
+| Clear UI state only | **Reset** |
+
+### Behavior Difference
+
+- **Reset**: App restarts at Discovery step. If you send a new authorization request, you will be **automatically logged in** (no password prompt) because the Keycloak SSO session is still active.
+
+- **Logout**: App restarts at Discovery step. If you send a new authorization request, the **Keycloak login page appears** because the SSO session has been terminated.
+
+>**NOTE**: Logout calls Keycloak's `end_session_endpoint` with an `id_token_hint` parameter. The `id_token` is only issued when authenticating with the `openid` scope (OIDC). If you authenticated without the `openid` scope (plain OAuth 2.0), Keycloak does not issue an `id_token` and server-side logout is not available. In this case, the playground will show a warning, clear local state, and skip the Keycloak logout call. To enable full logout, include `openid` in the scope when sending the authorization request.
+
 ### Backend Features
 - ✅ Public endpoint (no authentication)
 - ✅ Secured endpoint with role-based access control

@@ -62,3 +62,5 @@ The playground provides two buttons to restart the flow:
 - **Reset**: App restarts at Discovery step. If you send a new authentication request, you will be **automatically logged in** (no password prompt) because the Keycloak SSO session is still active.
 
 - **Logout**: App restarts at Discovery step. If you send a new authentication request, the **Keycloak login page appears** because the SSO session has been terminated.
+
+>**NOTE**: Logout calls Keycloak's `end_session_endpoint` with an `id_token_hint` parameter. The `id_token` is only issued when authenticating with the `openid` scope (OIDC). If no `id_token` is available (e.g., the token exchange was not completed), the playground will show a warning, clear local state, and skip the Keycloak logout call.

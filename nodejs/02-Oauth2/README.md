@@ -84,4 +84,4 @@ The playground provides two buttons to restart the flow:
 
 - **Logout**: App restarts at Discovery step. If you send a new authorization request, the **Keycloak login page appears** because the SSO session has been terminated.
 
->**NOTE**: To use the Logout feature with `id_token_hint`, make sure to include `openid` in the scope when sending the authorization request. This will return an `id_token` that is used for Single Logout.
+>**NOTE**: Logout calls Keycloak's `end_session_endpoint` with an `id_token_hint` parameter. The `id_token` is only issued when authenticating with the `openid` scope (OIDC). If you authenticated without the `openid` scope (plain OAuth 2.0), Keycloak does not issue an `id_token` and server-side logout is not available. In this case, the playground will show a warning, clear local state, and skip the Keycloak logout call. To enable full logout, include `openid` in the scope when sending the authorization request.
