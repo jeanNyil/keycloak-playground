@@ -180,7 +180,20 @@ function logout() {
         return;
     }
 
-    var idTokenHint = state.idToken || '';
+    if (!state.idToken) {
+        alert(
+            'Logout requires an ID token (id_token_hint), which is only issued when ' +
+            'authenticating with the \'openid\' scope (OIDC).\n\n' +
+            'If you authenticated without the \'openid\' scope (plain OAuth 2.0), ' +
+            'Keycloak does not issue an ID token and server-side logout is not available.\n\n' +
+            'Local session state has been cleared.'
+        );
+        localStorage.removeItem('state');
+        window.location.reload();
+        return;
+    }
+
+    var idTokenHint = state.idToken;
     var postLogoutRedirectUri = document.location.href.split('?')[0];
 
     // Clear local state first
@@ -218,6 +231,9 @@ function step(step) {
     for (i = 0; i < steps.length; i++) {
         document.getElementById('step-' + steps[i]).style.display = steps[i] === step ? 'block' : 'none'
     }
+    document.querySelectorAll('button[data-step]').forEach(function(btn) {
+        btn.classList.toggle('active', btn.getAttribute('data-step') === step);
+    });
     setState('step', step);
 
     switch(step) {

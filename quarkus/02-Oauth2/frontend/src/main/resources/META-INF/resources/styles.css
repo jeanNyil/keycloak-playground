@@ -1,5 +1,19 @@
 body {
-    font-family: sans-serif;
+    font-family: "Red Hat Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+}
+
+h1 {
+    font-family: "Red Hat Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+}
+
+h3 {
+    font-weight: 600;
+    color: #6a6e73;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8em;
 }
 
 label {
@@ -11,10 +25,71 @@ label {
 input {
     width: 400px;
     margin-bottom: 10px;
+    transition: border-color 0.15s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: #06c;
+    box-shadow: 0 0 0 1px #06c;
 }
 
 pre {
     border: 1px solid #ccc;
     padding: 10px;
     background-color: #f0f0f0;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
+/* Step navigation buttons */
+body > button {
+    padding: 6px 14px;
+    margin: 0 4px 8px 0;
+    border: 1px solid #151515;
+    border-radius: 4px;
+    background: #fff;
+    color: #151515;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+body > button:hover,
+body > button.active {
+    background: #151515;
+    color: #fff;
+}
+
+/* Reset button */
+body > button:nth-last-of-type(2) {
+    border-color: #6a6e73;
+    color: #6a6e73;
+}
+
+body > button:nth-last-of-type(2):hover {
+    background: #6a6e73;
+    color: #fff;
+}
+
+/* Logout button */
+body > button:last-of-type {
+    border-color: #c9190b;
+    color: #c9190b;
+}
+
+body > button:last-of-type:hover {
+    background: #c9190b;
+    color: #fff;
+}
+
+/* Action buttons inside step panels */
+div[id^="step-"] button {
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+div[id^="step-"] button:hover {
+    opacity: 0.85;
 }
