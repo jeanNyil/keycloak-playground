@@ -88,7 +88,7 @@ You can then execute your native executable with: `./target/quarkus-oidc-playgro
 >**NOTE**: If you're on Apple Silicon and built the native image inside a Linux container, the result is a Linux ELF binary. macOS can't execute Linux binaries, so you'll get "exec format error". Build and run the container image instead:
 >
 > ```bash
-> podman build -f src/main/docker/Dockerfile.native -t quarkus-oidc-playground .
+> podman build --platform linux/amd64 -f src/main/docker/Dockerfile.native -t quarkus-oidc-playground .
 > podman run --rm --name quarkus-oidc-playground \
 >   -p 8080:8080 \
 >   -e KEYCLOAK_URL=https://sso.apps.example.com \

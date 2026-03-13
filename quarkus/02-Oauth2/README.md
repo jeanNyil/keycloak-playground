@@ -154,7 +154,7 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 > 
 > 1. Build the container image of your Linux native binary:
 >     ```bash
->     podman build -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-backend .
+>     podman build --platform linux/amd64 -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-backend .
 >     ```
 > 2. Run the container:
 >     ```bash
@@ -182,7 +182,7 @@ You can then execute your native executable with: `./target/quarkus-oauth-playgr
 > 
 > 1. Build the container image of your Linux native binary:
 >     ```bash
->     podman build -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-frontend .
+>     podman build --platform linux/amd64 -f src/main/docker/Dockerfile.native -t quarkus-oauth-playground-frontend .
 >     ```
 > 2. Run the container:
 >     ```bash

@@ -106,16 +106,16 @@ Both implementations support deployment to OpenShift/Kubernetes with pre-configu
 
 ### Build Container Images
 
-**Node.js:**
+**Node.js** (single-arch example -- for multi-arch manifests with linux/amd64 + linux/arm64, see [nodejs/README.md](./nodejs/README.md#build-and-push-container-images)):
 ```bash
 cd nodejs
-podman build -t quay.io/<YOUR_USERNAME>/nodejs-oidc-playground:1.0.0 01-OIDC/
+podman build --no-cache --platform linux/amd64 -t quay.io/<YOUR_USERNAME>/nodejs-oidc-playground:1.0.0 01-OIDC/
 podman push quay.io/<YOUR_USERNAME>/nodejs-oidc-playground:1.0.0
 
-podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 02-Oauth2/frontend/
+podman build --no-cache --platform linux/amd64 -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 02-Oauth2/frontend/
 podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-frontend:1.0.0
 
-podman build -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0 02-Oauth2/backend/
+podman build --no-cache --platform linux/amd64 -t quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0 02-Oauth2/backend/
 podman push quay.io/<YOUR_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 ```
 

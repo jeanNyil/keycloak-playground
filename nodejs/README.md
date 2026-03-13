@@ -52,7 +52,9 @@ A configured realm with the following:
 
 ## Build and Push Container Images
 
-> **Note**: Pre-built images are available at `quay.io/<YOUR_REGISTRY>` and can be used directly for deployment. If you want to build your own images, replace `<YOUR_QUAY_USERNAME>` with your Quay.io username or container registry organization name.
+> **Note**: Pre-built images are available at `quay.io/jnyilimbibi` and can be used directly for deployment. If you want to build your own images, replace `<YOUR_QUAY_USERNAME>` with your Quay.io username or container registry organization name.
+
+The following commands build multi-arch images (linux/amd64 + linux/arm64) so the same tag works on both x86_64 servers and Apple Silicon machines. The Containerfiles use a multi-stage build where `npm ci` runs natively on the build host (via `$BUILDPLATFORM`), avoiding QEMU emulation failures. The `--manifest` flag adds each platform build directly to a manifest list with correct architecture metadata. The `--no-cache` flag ensures each architecture produces distinct image layers; without it, podman may reuse cached layers from a previous build, resulting in images with incorrect binaries for the target platform.
 
 ```bash
 # Login to Quay.io
@@ -60,18 +62,24 @@ podman login quay.io
 
 # OIDC Playground
 cd 01-OIDC
-podman build -t quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0 .
-podman push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0
+podman manifest create quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0
+podman build --no-cache --platform linux/amd64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0 .
+podman build --no-cache --platform linux/arm64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0 .
+podman manifest push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oidc-playground:1.0.0
 
 # OAuth Frontend
 cd ../02-Oauth2/frontend
-podman build -t quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 .
-podman push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0
+podman manifest create quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0
+podman build --no-cache --platform linux/amd64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 .
+podman build --no-cache --platform linux/arm64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0 .
+podman manifest push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-frontend:1.0.0
 
 # OAuth Backend
 cd ../backend
-podman build -t quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0 .
-podman push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0
+podman manifest create quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0
+podman build --no-cache --platform linux/amd64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0 .
+podman build --no-cache --platform linux/arm64 --manifest quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0 .
+podman manifest push quay.io/<YOUR_QUAY_USERNAME>/nodejs-oauth-playground-backend:1.0.0
 ```
 
 > **Important**: If you built custom images with your own Quay username, you must update the image references in the OpenShift deployment manifests before deploying:
