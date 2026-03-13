@@ -1,4 +1,19 @@
-FROM registry.access.redhat.com/ubi10/nodejs-22:10.1
+# Stage 1: Install dependencies on the build host's native architecture.
+# This avoids running npm under QEMU emulation, which fails with
+# "Exit handler never called" when cross-building (e.g., linux/amd64 on
+# Apple Silicon). All dependencies are pure JavaScript, so the resulting
+# node_modules/ is architecture-independent and can be copied into any
+# target platform image.
+# $BUILDPLATFORM ensures this stage always runs on the build host's native
+# arch, even when --platform targets a different architecture.
+FROM --platform=$BUILDPLATFORM registry.access.redhat.com/ubi10/nodejs-22:10.1 AS deps
+WORKDIR /opt/app-root/src
+COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+
+# Stage 2: Final image for the requested target platform (linux/amd64, linux/arm64).
+# $TARGETPLATFORM is set automatically by podman/buildah from the --platform flag.
+FROM --platform=$TARGETPLATFORM registry.access.redhat.com/ubi10/nodejs-22:10.1
 
 # Labels for OpenShift and container metadata
 LABEL name="nodejs-oidc-playground" \
@@ -25,13 +40,11 @@ ENV OTEL_SERVICE_NAME=nodejs-oidc-playground \
 # Set working directory
 WORKDIR /opt/app-root/src
 
-# Copy package files and install dependencies
-COPY --chown=1001:0 package*.json ./
-RUN npm install --omit=dev && \
-    npm cache clean --force
+# Copy dependencies from the native build stage
+COPY --from=deps --chown=1001:0 /opt/app-root/src/node_modules ./node_modules
 
 # Copy application files with proper ownership
-COPY --chown=1001:0 app.js tracing.js client.js index.html styles.css ./
+COPY --chown=1001:0 package*.json app.js tracing.js client.js index.html styles.css ./
 
 # Set proper permissions for OpenShift (arbitrary user ID support)
 RUN chmod -R g=u /opt/app-root/src
