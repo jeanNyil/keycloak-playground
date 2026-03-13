@@ -157,7 +157,7 @@ cd quarkus/02-Oauth2/frontend && ./mvnw clean package -Dquarkus.openshift.deploy
 
 **Important**: Client roles cannot be imported via Keycloak Admin UI. You must manually create the `user` role for backend clients after import.
 
-## ⚙️ Environment Configuration
+## <a id="environment-configuration"></a> ⚙️ Environment Configuration
 
 All playgrounds can be customized to point at your own Keycloak instance. The configuration mechanism differs between Node.js (environment variables) and Quarkus (`application.properties`).
 
@@ -204,7 +204,7 @@ All playgrounds provide **Reset** and **Logout** buttons:
 
 > **Note**: Logout requires an `id_token_hint`, which is only issued when authenticating with the `openid` scope (OIDC). If no ID token is available (e.g., plain OAuth 2.0 without `openid` scope), the playground will show a warning, clear local state, and skip the Keycloak logout call. See each project's README for details.
 
-## 📊 OpenTelemetry Tracing
+## <a id="opentelemetry-tracing"></a> 📊 OpenTelemetry Tracing
 
 All applications are instrumented with OpenTelemetry for distributed tracing:
 
