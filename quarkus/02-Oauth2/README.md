@@ -116,7 +116,25 @@ cd quarkus/02-Oauth2/frontend
 # The frontend will start on http://localhost:8080
 ```
 
-Access the playground at `http://localhost:8080`
+## How to Use
+
+Open the playground application at http://localhost:8080 (local dev) or `https://<your-openshift-route>` (OpenShift deployment).
+
+![Quarkus OAuth 2.0 Playground](../../_images/quarkus-oauth-playground-app.png)
+
+1. Load the OAuth 2.0 provider configuration by clicking on the button labelled **`Load OAuth 2.0 Provider Configuration`**
+2. Click on the button labeled **`2 - Authorization`**.
+3. You can leave the **`client_id`** and **`scope`** values as they are, then click on the button labeled **`Send Authorization Request`**
+4. Now that the playground application has obtained an access token, click on the button labeled **`3 - Invoke Service`** to test the backend REST API:
+
+    - **Public Endpoint**: Click **`Invoke /public`** to call the public endpoint. This endpoint requires no authentication and should always return `✓ [200] Public message!`.
+
+    - **Secured Endpoint**: Click **`Invoke /secured`** to call the secured endpoint. This endpoint requires a valid access token with the **`quarkus-oauth-backend:user`** client role.
+        - ✓ **Access Granted**: `✓ [200] Secret message!` - User has the required role
+        - ✗ **Access Denied**: `✗ [403] Access denied` - User lacks the required role
+        - ✗ **Unauthorized**: `✗ [401] Unauthorized` - No valid token provided
+
+    >**NOTE**: The secured endpoint will only grant access if the authenticated user has the **`quarkus-oauth-backend:user`** client role and the access token **`aud`** claim is verified. **_Use access limitation by scope or client role assignment_**.
 
 ## Building Native Images
 

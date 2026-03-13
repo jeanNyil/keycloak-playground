@@ -86,16 +86,16 @@ Quarkus automatically starts the Grafana LGTM stack when running in dev mode:
 You can then execute your native executable with: `./target/quarkus-oidc-playground-1.0.0-SNAPSHOT-runner`
 
 >**NOTE**: If you're on Apple Silicon and built the native image inside a Linux container, the result is a Linux ELF binary. macOS can't execute Linux binaries, so you'll get "exec format error". Build and run the container image instead:
-
-```bash
-podman build -f src/main/docker/Dockerfile.native -t quarkus-oidc-playground .
-podman run --rm --name quarkus-oidc-playground \
-  -p 8080:8080 \
-  -e KEYCLOAK_URL=https://sso.apps.example.com \
-  -e KEYCLOAK_ISSUER=https://sso.apps.example.com/realms/demo \
-  -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
-  quarkus-oidc-playground
-```
+>
+> ```bash
+> podman build -f src/main/docker/Dockerfile.native -t quarkus-oidc-playground .
+> podman run --rm --name quarkus-oidc-playground \
+>   -p 8080:8080 \
+>   -e KEYCLOAK_URL=https://sso.apps.example.com \
+>   -e KEYCLOAK_ISSUER=https://sso.apps.example.com/realms/demo \
+>   -e QUARKUS_OTEL_EXPORTER_OTLP_ENDPOINT=http://host.containers.internal:4317 \
+>   quarkus-oidc-playground
+> ```
 
 ## Deploy to OpenShift
 
@@ -145,30 +145,26 @@ https://quarkus-oidc-playground.apps.example.com/*
 
 ## How to Use
 
-### Step 1: Discovery
-1. The issuer URL is automatically populated from the backend configuration (`keycloak.issuer` property)
-2. You can override it by entering a different Keycloak issuer URL (e.g., `https://sso.example.com/realms/demo`)
-3. Click "Load OpenID Provider Configuration"
-4. View the OIDC discovery document with available endpoints
+Open the playground application at http://localhost:8080 (local dev) or `https://<your-openshift-route>` (OpenShift deployment).
 
-### Step 2: Authentication
-1. Enter your client_id (e.g., `quarkus-oidc-playground`)
-2. Configure scope, prompt, max_age, and login_hint as needed
-3. Click "Generate Authentication Request"
-4. Click the generated link to authenticate with Keycloak
+![Quarkus OpenID Connect Playground](../../_images/quarkus-oidc-playground-app.png)
 
-### Step 3: Token Exchange
-1. After authentication, the authorization code is automatically captured
-2. Click "Load Tokens" to exchange the code for tokens
-3. View the ID Token (header, payload, signature)
+1. The issuer URL is automatically populated from the backend configuration (`keycloak.issuer` property). You can override it by entering a different Keycloak issuer URL (e.g., `https://sso.example.com/realms/demo`). Load the OpenID provider configuration by clicking on the button labelled **`Load OpenID Provider Configuration`**
 
-### Step 4: Refresh Token
-1. Click "Refresh Token" to use the refresh token
-2. View the new tokens received
+2. Click on the button labeled **`2 - Authentication`** to generate an authentication request by clicking on **`Generate Authentication Request`**. Next, click on the button labeled **`Send Authentication Request`** and you will be redirected to the Keycloak login pages. If you want to experiment a bit you can, for example, try the following steps:
+    - **`Set prompt to login`**: With this value, Keycloak should always ask you to re-authenticate.
+    - **`Set max_age to 60`**: With this value, Keycloak will re-authenticate you if you wait for at least 60 seconds since the last time you authenticated.
+    - **`Set login_hint to your username`**: This should prefill the username in the Keycloak login page.
 
-### Step 5: UserInfo
-1. Click "Load UserInfo" to retrieve user information
-2. View the user profile data from Keycloak
+    >**NOTE**: If you try any of the preceding steps, don't forget to generate and send the authentication request again to see how Keycloak behaves.
+
+    After Keycloak has redirected back to the playground application, you will see the authentication response in the **`Authentication Response`** section. The code is what is called the **`authorization code`**, which the application uses to obtain the ID token and the refresh token.
+
+3. Click on the button labeled **`3 - Token`**. You will see the authorization code has already been filled in on the form so you can go ahead and click on the button labeled **`Send Token Request`**.
+
+4. Click on **`4 - Refresh Token`** to use the refresh token and obtain new tokens.
+
+5. Click on **`5 - UserInfo`** to invoke the UserInfo endpoint. Under **`UserInfo Request`**, you will see that the playground application is sending a request to the Keycloak UserInfo endpoint, including the access token in the authorization header.
 
 ## Reset vs Logout
 

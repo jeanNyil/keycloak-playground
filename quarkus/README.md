@@ -9,46 +9,10 @@ Cloud-native implementations of OIDC and OAuth 2.0 playgrounds using Quarkus fra
 
 ## Prerequisites
 
-Before running the playgrounds, you need:
+A running Keycloak (or RHBK) instance and a configured realm. See the [root README](../README.md#-quick-start) for general setup and the individual project READMEs for client-specific details:
 
-### Keycloak Server
-
-A running instance of Keycloak (or Red Hat build of Keycloak) - either:
-- **Local**: Keycloak running on `http://localhost:8080`
-- **Remote**: Keycloak accessible via URL (e.g., `https://sso.apps.example.com`)
-
-### Realm Configuration
-
-A configured realm with the following:
-- **Realm name**: e.g., `demo` (or your custom realm)
-- **OIDC Client**: For the OIDC Playground
-  - Client ID: `quarkus-oidc-playground`
-  - Client authentication: `OFF` (public client)
-  - Standard flow enabled: `ON`
-  - Valid Redirect URIs: 
-    - `http://localhost:8080/*` (local dev)
-    - `https://<your-openshift-route>/*` (OpenShift)
-  - Web Origins: `*` or specific origins
-- **OAuth Frontend Client**: For the OAuth Playground frontend
-  - Client ID: `quarkus-oauth-playground`
-  - Client authentication: `OFF` (public client)
-  - Standard flow enabled: `ON`
-  - Valid Redirect URIs: 
-    - `http://localhost:8080/*` (local dev)
-    - `https://<your-openshift-route>/*` (OpenShift)
-  - Web Origins: `*` or specific origins
-- **OAuth Backend Client**: For the OAuth Playground backend
-  - Client ID: `quarkus-oauth-backend`
-  - Client authentication: `ON` (confidential client with secret)
-  - **Client Role**: `user` (required for secured endpoint access)
-- **Test User**: A user with the `quarkus-oauth-backend:user` client role assigned
-
-> **Important**: After creating the `quarkus-oauth-backend` client, you must manually create the `user` client role in the Keycloak Admin UI:
-> 1. Navigate to **Clients** → **quarkus-oauth-backend** → **Roles** tab
-> 2. Click **Create Role**
-> 3. Set **Role Name** to `user`
-> 4. Save the role
-> 5. Assign this role to your test user via **Users** → *[select user]* → **Role Mapping** → **Client Roles** → **quarkus-oauth-backend**
+- [OIDC Playground prerequisites](./01-OIDC/README.md)
+- [OAuth 2.0 Playground prerequisites](./02-Oauth2/README.md)
 
 ---
 
@@ -115,32 +79,10 @@ No need to manually run Docker containers!
 
 ## Building Native Images
 
-### OIDC Playground
+Native image compilation is supported for all Quarkus playgrounds. See each project's README for specific instructions:
 
-```bash
-cd 01-OIDC
-./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
-```
-
-### OAuth 2.0 Backend
-
-```bash
-cd 02-Oauth2/backend
-./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
-```
-
-### OAuth 2.0 Frontend
-
-```bash
-cd 02-Oauth2/frontend
-./mvnw package -Pnative -Dquarkus.native.native-image-xmx=7g
-```
-
-> **Note**: Native builds use container runtime (`quarkus.native.container-build=true`). Adjust `quarkus.native.native-image-xmx` based on available memory.
-
-> **SSL Support**: 
-> - `01-OIDC`: Explicitly enabled via `quarkus.ssl.native=true` (uses Vert.x WebClient)
-> - `02-Oauth2` (frontend/backend): Automatically enabled by `quarkus-oidc` extension
+- [OIDC native build](./01-OIDC/README.md)
+- [OAuth 2.0 native build](./02-Oauth2/README.md)
 
 ---
 
@@ -302,6 +244,15 @@ echo "OIDC Playground: https://$(oc get route quarkus-oidc-playground -o jsonpat
 echo "OAuth Frontend:  https://$(oc get route quarkus-oauth-playground-frontend -o jsonpath='{.spec.host}')"
 # Note: OAuth Backend has no external route - accessed via frontend proxy
 ```
+
+---
+
+## Reset vs Logout
+
+Both playgrounds provide **Reset** and **Logout** buttons. Reset clears local browser state only (the Keycloak SSO session stays active), while Logout also terminates the Keycloak session. For full details, see each project's README:
+
+- [OIDC Playground – Reset vs Logout](./01-OIDC/README.md#reset-vs-logout)
+- [OAuth 2.0 Playground – Reset vs Logout](./02-Oauth2/README.md#reset-vs-logout)
 
 ---
 
@@ -525,33 +476,10 @@ quarkus/
 
 ## Troubleshooting
 
-### Invalid Redirect URI
+See each project's README for troubleshooting guides:
 
-If you see `invalid_redirect_uri` errors:
-1. **Verify you're configuring the client in the correct realm** (check the issuer URL)
-2. Add your application URL to Valid Redirect URIs in the Keycloak client
-3. Ensure the URL matches exactly (including trailing slash behavior)
-4. Check Keycloak server logs for the exact error
-
-### Native Image: URL Protocol Not Enabled
-
-If you see `MalformedURLException: Accessing a URL protocol that was not enabled`:
-- **01-OIDC**: Uses `quarkus.ssl.native=true` (Vert.x WebClient requires explicit SSL)
-- **02-Oauth2**: SSL is automatic (quarkus-oidc extension enables it)
-
-For more details, see the [Quarkus Native and SSL guide](https://quarkus.io/version/3.27/guides/native-and-ssl).
-
-### 403 Forbidden on /secured Endpoint
-
-1. Verify the user has the `quarkus-oauth-backend:user` client role
-2. Check that the access token includes the `resource_access.quarkus-oauth-backend.roles` claim
-3. Ensure `quarkus.oidc.roles.role-claim-path` is set correctly in backend
-
-### Token Validation Failed
-
-1. Verify the backend `quarkus.oidc.auth-server-url` matches the token issuer
-2. Check that the client secret is correct (for confidential clients)
-3. Ensure strict audience validation: backend must have matching `quarkus.oidc.client-id`
+- [OIDC Playground troubleshooting](./01-OIDC/README.md#troubleshooting)
+- [OAuth 2.0 Playground troubleshooting](./02-Oauth2/README.md#troubleshooting)
 
 ---
 

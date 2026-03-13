@@ -183,6 +183,15 @@ echo "OAuth Frontend:  https://$(oc get route nodejs-oauth-playground-frontend -
 
 ---
 
+## Reset vs Logout
+
+Both playgrounds provide **Reset** and **Logout** buttons. Reset clears local browser state only (the Keycloak SSO session stays active), while Logout also terminates the Keycloak session. For full details, see each project's README:
+
+- [OIDC Playground – Reset vs Logout](./01-OIDC/README.md#reset-vs-logout)
+- [OAuth 2.0 Playground – Reset vs Logout](./02-Oauth2/README.md#reset-vs-logout)
+
+---
+
 ## OpenTelemetry Instrumentation
 
 Both playground applications are instrumented with OpenTelemetry for distributed tracing. The instrumentation uses:
@@ -200,104 +209,20 @@ Both playground applications are instrumented with OpenTelemetry for distributed
 | `OTEL_SERVICE_VERSION` | Service version | `1.0.0` |
 | `OTEL_LOG_LEVEL` | Logging level (`info`, `debug`) | `info` |
 
-### Trace Flow Diagrams
+### Trace Flow
 
-#### OIDC Playground
+For architecture and trace flow diagrams, see the [root README](../README.md#-architecture).
 
-All Keycloak interactions are proxied through the frontend server for full trace correlation:
-
-```
-┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
-│          │      │                     │      │              │
-│  Browser │─────▶│  OIDC Frontend      │─────▶│   Keycloak   │
-│          │      │  (Express + OTel)   │      │   (OTel)     │
-│          │      │                     │      │              │
-└──────────┘      └─────────────────────┘      └──────────────┘
-     │                     │                          │
-     │  /api/keycloak/*    │   /.well-known/*         │
-     │  ─────────────────▶ │   /protocol/openid/*     │
-     │                     │   ──────────────────────▶│
-     │                     │                          │
-     └─────────────────────┴──────────────────────────┘
-                           │
-                           ▼
-              ┌─────────────────────────┐
-              │   OpenTelemetry         │
-              │   Collector             │
-              │   (Tempo/Jaeger/etc.)   │
-              └─────────────────────────┘
-```
-
-**Traced Operations:**
+**Traced Operations (OIDC):**
 - `GET /api/keycloak/discovery` → Keycloak OIDC Discovery
 - `POST /api/keycloak/token` → Token Exchange
 - `POST /api/keycloak/refresh` → Token Refresh
 - `GET /api/keycloak/userinfo` → UserInfo Endpoint
 
-#### OAuth Playground
-
-The OAuth flow involves three services with full trace propagation:
-
-```
-┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
-│          │      │                     │      │              │
-│  Browser │─────▶│  OAuth Frontend     │─────▶│   Keycloak   │
-│          │      │  (Express + OTel)   │      │   (OTel)     │
-│          │      │                     │      │              │
-└──────────┘      └──────────┬──────────┘      └──────────────┘
-                             │                        ▲
-                             │                        │
-                             ▼                        │
-                  ┌─────────────────────┐             │
-                  │                     │  Token      │
-                  │  OAuth Backend      │  Validation │
-                  │  (Express + OTel +  │─────────────┘
-                  │   keycloak-connect) │
-                  │                     │
-                  └─────────────────────┘
-                             │
-                             ▼
-              ┌─────────────────────────┐
-              │   OpenTelemetry         │
-              │   Collector             │
-              └─────────────────────────┘
-```
-
-**Complete Trace Flow:**
-
-```
-┌────────────────────────────────────────────────────────────────────────┐
-│                         Single Distributed Trace                       │
-├────────────────────────────────────────────────────────────────────────┤
-│                                                                        │
-│  Browser Request                                                       │
-│  ════════════════                                                      │
-│       │                                                                │
-│       ▼                                                                │
-│  ┌─────────────────────────────────────────────────────────────────┐   │
-│  │ nodejs-oauth-playground-frontend                                │   │
-│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
-│  │ │ GET /api/keycloak/discovery                                 │ │   │
-│  │ │    └──▶ GET keycloak/.well-known/openid-configuration       │ │   │
-│  │ └─────────────────────────────────────────────────────────────┘ │   │
-│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
-│  │ │ POST /api/keycloak/token                                    │ │   │
-│  │ │    └──▶ POST keycloak/protocol/openid-connect/token         │ │   │
-│  │ └─────────────────────────────────────────────────────────────┘ │   │
-│  │ ┌─────────────────────────────────────────────────────────────┐ │   │
-│  │ │ GET /api/service                                            │ │   │
-│  │ │    └──▶ ┌────────────────────────────────────────────────┐  │ │   │
-│  │ │         │ nodejs-oauth-playground-backend                │  │ │   │
-│  │ │         │ ┌────────────────────────────────────────────┐ │  │ │   │
-│  │ │         │ │ GET /secured                               │ │  │ │   │
-│  │ │         │ │    └──▶ keycloak (token validation)        │ │  │ │   │
-│  │ │         │ └────────────────────────────────────────────┘ │  │ │   │
-│  │ │         └────────────────────────────────────────────────┘  │ │   │
-│  │ └─────────────────────────────────────────────────────────────┘ │   │
-│  └─────────────────────────────────────────────────────────────────┘   │
-│                                                                        │
-└────────────────────────────────────────────────────────────────────────┘
-```
+**Traced Operations (OAuth):**
+- `GET /api/keycloak/discovery` → Keycloak OIDC Discovery
+- `POST /api/keycloak/token` → Token Exchange
+- `GET /api/service` → Backend secured endpoint (with token validation against Keycloak)
 
 ### Viewing Traces
 
@@ -321,7 +246,7 @@ To run with tracing locally using the Grafana LGTM stack (Loki, Grafana, Tempo, 
 
 ```bash
 # Start the LGTM stack (all-in-one observability)
-docker run -d --name lgtm \
+podman run -d --name lgtm \
   -p 3100:3000 \
   -p 4317:4317 \
   -p 4318:4318 \
