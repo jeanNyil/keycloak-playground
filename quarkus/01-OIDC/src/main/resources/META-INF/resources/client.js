@@ -54,9 +54,20 @@ function generateAuthenticationRequest() {
         req += '&login_hint=' + loginHint;
     }
 
-    setOutput('output-authenticationRequest', req.replace('?', '<br/><br/>').replaceAll('&', '<br/>'));
-    document.getElementById('authenticationRequestLink').onclick = function() {
-        document.location.href = req;
+    var formattedReq = req.replace('?', '<br/><br/>').replaceAll('&', '<br/>');
+    setState('authenticationRequest', formattedReq);
+    setState('authenticationRequestUrl', req);
+    restoreAuthenticationRequest();
+}
+
+function restoreAuthenticationRequest() {
+    if (state.authenticationRequest) {
+        setOutput('output-authenticationRequest', state.authenticationRequest);
+    }
+    if (state.authenticationRequestUrl) {
+        document.getElementById('authenticationRequestLink').onclick = function() {
+            document.location.href = state.authenticationRequestUrl;
+        }
     }
 }
 
@@ -259,8 +270,11 @@ function step(step) {
                 setInput('input-prompt', authenticationInput.prompt);
                 setInput('input-maxage', authenticationInput.maxAge);
                 setInput('input-loginhint', authenticationInput.loginHint);
-                setOutput('output-authenticationResponse', '');
+                if (!getQueryVariable('code') && !getQueryVariable('error')) {
+                    setOutput('output-authenticationResponse', '');
+                }
             }
+            restoreAuthenticationRequest();
             break;
     }
 }
@@ -324,6 +338,8 @@ function init() {
     if (state.discovery) {
         setOutput('output-discovery', state.discovery);
     }
+
+    restoreAuthenticationRequest();
 
     var code = getQueryVariable('code');
     if (code) {
