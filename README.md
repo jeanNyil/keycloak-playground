@@ -22,13 +22,13 @@ Traditional Node.js/Express implementations with OpenTelemetry tracing:
 📖 **[Node.js Documentation](./nodejs/README.md)**
 
 ### Quarkus Implementation
-Modern cloud-native implementation using Quarkus framework:
+Modern cloud-native implementation using Quarkus framework with server-rendered UI (HTMX + Qute templates):
 
-- **[Quarkus OIDC Playground](./quarkus/01-OIDC)** - Interactive OpenID Connect flow demonstration with reactive Vert.x WebClient
-- **[Quarkus OAuth 2.0 Playground](./quarkus/02-Oauth2)** - OAuth 2.0 playground with frontend/backend separation using OIDC extension
+- **[Quarkus OIDC Playground](./quarkus/01-OIDC)** - Interactive OpenID Connect flow demonstration with Qute templates and Vert.x WebClient
+- **[Quarkus OAuth 2.0 Playground](./quarkus/02-Oauth2)** - OAuth 2.0 playground with frontend/backend separation using Qute templates
 
 **Key Features:**
-- Native OIDC and OAuth 2.0 flow implementations
+- Server-rendered UI with HTMX and Qute templates (zero custom JavaScript)
 - Built-in OIDC authentication and token validation
 - SmallRye Health checks for Kubernetes/OpenShift
 - Micrometer metrics integration
@@ -178,9 +178,8 @@ Edit `src/main/resources/application.properties` in each project:
 
 | Property | Description | Used By |
 |----------|-------------|---------|
-| `keycloak.url` | Keycloak server root URL | OIDC playground |
-| `keycloak.issuer` | Keycloak issuer realm URL (auto-loaded by UI) | OIDC playground |
-| `quarkus.oidc.auth-server-url` | Keycloak auth server URL | OAuth frontend and backend |
+| `keycloak.issuer` | Keycloak issuer realm URL (auto-loaded by UI) | OIDC playground, OAuth frontend |
+| `quarkus.oidc.auth-server-url` | Keycloak auth server URL | OAuth backend |
 | `quarkus.oidc.credentials.secret` | Backend client secret | OAuth backend (required) |
 | `oauth.service.url` | Backend service URL | OAuth frontend |
 
