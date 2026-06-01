@@ -31,10 +31,7 @@
   </dependencyManagement>
 
   <dependencies>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-openshift</artifactId>
-    </dependency>
+    <!-- REST + Qute templating -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-rest</artifactId>
@@ -45,11 +42,38 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-rest-qute</artifactId>
+    </dependency>
+
+    <!-- Web Bundler for HTMX dependency management -->
+    <dependency>
+      <groupId>io.quarkiverse.web-bundler</groupId>
+      <artifactId>quarkus-web-bundler</artifactId>
+      <version>1.9.3</version>
+    </dependency>
+
+    <!-- HTMX library (consumed by Web Bundler at build time) -->
+    <dependency>
+      <groupId>org.mvnpm</groupId>
+      <artifactId>htmx.org</artifactId>
+      <version>2.0.4</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Reactive HTTP client for Keycloak proxy -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
       <artifactId>quarkus-vertx</artifactId>
     </dependency>
     <dependency>
       <groupId>io.smallrye.reactive</groupId>
       <artifactId>smallrye-mutiny-vertx-web-client</artifactId>
+    </dependency>
+
+    <!-- Observability -->
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-opentelemetry</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -57,15 +81,17 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-opentelemetry</artifactId>
+      <artifactId>quarkus-micrometer</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-smallrye-health</artifactId>
     </dependency>
+
+    <!-- Cloud-native -->
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-micrometer</artifactId>
+      <artifactId>quarkus-openshift</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -73,7 +99,7 @@
     </dependency>
 
     <!-- For Dev Mode  -->
-    <dependency><!-- Enables the LGTM Dev Service -->
+    <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-observability-devservices-lgtm</artifactId>
       <scope>provided</scope>

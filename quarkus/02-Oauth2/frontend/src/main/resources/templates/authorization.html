@@ -1,0 +1,38 @@
+<h2>Authorization</h2>
+<form method="POST" action="/auth/send">
+    <input type="hidden" name="redirectUri" id="redirect-uri-field">
+    <p>
+        <label>client_id</label>
+        <input name="clientId" value="{state.clientId ?: 'quarkus-oauth-playground'}"><br/>
+        <label>scope</label>
+        <input name="scope" value="{state.scope ?: ''}">
+    </p>
+    <p>
+        <button type="submit">
+            <span>Send Authorization Request</span>
+        </button>
+    </p>
+</form>
+<script>
+    document.getElementById('redirect-uri-field').value = window.location.origin + '/';
+</script>
+
+{#if state.authError}
+<hr/>
+<h3>Authorization Error</h3>
+<pre class="error">error={state.authError}
+error_description={state.authErrorDescription}</pre>
+{/if}
+
+{#if accessTokenPayload}
+<hr/>
+<h3>Access Token</h3>
+Header
+<pre>{accessTokenHeader}</pre>
+Payload
+<pre>{accessTokenPayload}</pre>
+Signature
+<pre>{accessTokenSignature}</pre>
+Encoded
+<pre>{accessTokenEncoded}</pre>
+{/if}

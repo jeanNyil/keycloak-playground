@@ -1,0 +1,15 @@
+<h2>UserInfo</h2>
+<p>
+    <button hx-post="/userinfo" hx-target="#userinfo-result" hx-swap="innerHTML">
+        <span class="htmx-indicator">Loading...</span>
+        <span>Send UserInfo Request</span>
+    </button>
+</p>
+<hr/>
+
+<div id="userinfo-result">
+    {#if userInfoResponseJson}
+    <h3>UserInfo Response</h3>
+    <pre>{userInfoResponseJson}</pre>
+    {/if}
+</div>

@@ -1,6 +1,6 @@
 # Keycloak Playground - Quarkus Implementation
 
-Cloud-native implementations of OIDC and OAuth 2.0 playgrounds using Quarkus framework.
+Cloud-native implementations of OIDC and OAuth 2.0 playgrounds using Quarkus framework with HTMX and Qute templates for server-rendered UI.
 
 - [OpenID Connect Playground](./01-OIDC/README.md)
 - [OAuth 2.0 Playground](./02-Oauth2/README.md)
@@ -24,7 +24,6 @@ A running Keycloak (or RHBK) instance and a configured realm. See the [root READ
 cd 01-OIDC
 
 # Update application.properties with your Keycloak settings
-# - keycloak.url
 # - keycloak.issuer
 
 # Run in dev mode (with LGTM observability stack)
@@ -55,8 +54,7 @@ cd 02-Oauth2/backend
 cd 02-Oauth2/frontend
 
 # Update application.properties with your Keycloak settings
-# - quarkus.oidc.auth-server-url
-# - quarkus.oidc.client-id
+# - keycloak.issuer
 # - oauth.service.url (backend URL, default: http://localhost:8081)
 
 ./mvnw quarkus:dev
@@ -68,7 +66,7 @@ cd 02-Oauth2/frontend
 
 Quarkus automatically starts the Grafana LGTM stack (Loki, Grafana, Tempo, Mimir) when running in dev mode:
 
-- **Grafana**: Available through Quarkus Dev UI → Observability
+- **Grafana**: Available through Quarkus Dev UI -> Observability
 - **Traces**: Automatically sent to Tempo
 - **Logs**: Automatically sent to Loki  
 - **Metrics**: Automatically sent to Prometheus/Mimir
@@ -181,7 +179,7 @@ metadata:
 data:
   application.properties: |
     quarkus.otel.exporter.otlp.endpoint=http://otel-collector:4317
-    quarkus.oidc.auth-server-url=https://sso.apps.example.com/realms/demo
+    keycloak.issuer=https://sso.apps.example.com/realms/demo
     oauth.service.url=http://quarkus-oauth-playground-backend:80
 ```
 
@@ -240,8 +238,8 @@ oc logs -f deployment/quarkus-oauth-playground-backend
 Get your application URLs:
 
 ```bash
-echo "OIDC Playground: https://$(oc get route quarkus-oidc-playground -o jsonpath='{.spec.host}')"
-echo "OAuth Frontend:  https://$(oc get route quarkus-oauth-playground-frontend -o jsonpath='{.spec.host}')"
+echo "OIDC Playground:  https://$(oc get route quarkus-oidc-playground -o jsonpath='{.spec.host}')"
+echo "OAuth Frontend:   https://$(oc get route quarkus-oauth-playground-frontend -o jsonpath='{.spec.host}')"
 # Note: OAuth Backend has no external route - accessed via frontend proxy
 ```
 
@@ -249,10 +247,10 @@ echo "OAuth Frontend:  https://$(oc get route quarkus-oauth-playground-frontend 
 
 ## Reset vs Logout
 
-Both playgrounds provide **Reset** and **Logout** buttons. Reset clears local browser state only (the Keycloak SSO session stays active), while Logout also terminates the Keycloak session. For full details, see each project's README:
+Both playgrounds provide **Reset** and **Logout** buttons. Reset clears the server-side session state only (the Keycloak SSO session stays active), while Logout also terminates the Keycloak session. For full details, see each project's README:
 
-- [OIDC Playground – Reset vs Logout](./01-OIDC/README.md#reset-vs-logout)
-- [OAuth 2.0 Playground – Reset vs Logout](./02-Oauth2/README.md#reset-vs-logout)
+- [OIDC Playground -- Reset vs Logout](./01-OIDC/README.md#reset-vs-logout)
+- [OAuth 2.0 Playground -- Reset vs Logout](./02-Oauth2/README.md#reset-vs-logout)
 
 ---
 
@@ -286,7 +284,7 @@ All Keycloak interactions use Vert.x WebClient with automatic trace propagation:
 │          │      │   WebClient)        │      │              │
 └──────────┘      └─────────────────────┘      └──────────────┘
      │                     │                          │
-     │  /api/keycloak/*    │   /.well-known/*         │
+     │  HTMX requests      │   /.well-known/*         │
      │  ─────────────────▶ │   /protocol/openid/*     │
      │                     │   ──────────────────────▶│
      │                     │                          │
@@ -299,13 +297,6 @@ All Keycloak interactions use Vert.x WebClient with automatic trace propagation:
               └─────────────────────────┘
 ```
 
-**Traced Operations:**
-- `GET /api/config` → Configuration endpoint
-- `GET /api/keycloak/discovery` → Keycloak OIDC Discovery
-- `POST /api/keycloak/token` → Token Exchange
-- `GET /api/keycloak/userinfo` → UserInfo Endpoint
-- `GET /api/keycloak/logout` → Logout Redirect
-
 #### OAuth Playground
 
 Complete trace propagation across frontend, backend, and Keycloak:
@@ -314,8 +305,8 @@ Complete trace propagation across frontend, backend, and Keycloak:
 ┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
 │          │      │                     │      │              │
 │  Browser │─────▶│  Quarkus Frontend   │─────▶│   Keycloak   │
-│          │      │  (OIDC Web-App +    │      │   (OIDC)     │
-│          │      │   Vert.x WebClient) │      │              │
+│          │      │  (Qute + Vert.x     │      │   (OIDC)     │
+│          │      │   WebClient)        │      │              │
 └──────────┘      └──────────┬──────────┘      └──────────────┘
                              │                        ▲
                              │                        │
@@ -332,44 +323,6 @@ Complete trace propagation across frontend, backend, and Keycloak:
               │   OpenTelemetry         │
               │   Collector             │
               └─────────────────────────┘
-```
-
-**Complete Trace Flow with REST Client:**
-
-The frontend uses Quarkus REST Client with automatic trace propagation to call the backend:
-
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                         Single Distributed Trace                     │
-├──────────────────────────────────────────────────────────────────────┤
-│                                                                      │
-│  Browser Request                                                     │
-│  ════════════════                                                    │
-│       │                                                              │
-│       ▼                                                              │
-│  ┌────────────────────────────────────────────────────────────────┐  │
-│  │ quarkus-oauth-playground-frontend                              │  │
-│  │ ┌────────────────────────────────────────────────────────────┐ │  │
-│  │ │ GET /api/keycloak/discovery (Vert.x WebClient)             │ │  │
-│  │ │    └──▶ GET keycloak/.well-known/openid-configuration      │ │  │
-│  │ └────────────────────────────────────────────────────────────┘ │  │
-│  │ ┌────────────────────────────────────────────────────────────┐ │  │
-│  │ │ POST /api/keycloak/token (Vert.x WebClient)                │ │  │
-│  │ │    └──▶ POST keycloak/protocol/openid-connect/token        │ │  │
-│  │ └────────────────────────────────────────────────────────────┘ │  │
-│  │ ┌────────────────────────────────────────────────────────────┐ │  │
-│  │ │ GET /api/service/secured (REST Client)                     │ │  │
-│  │ │    └──▶ ┌────────────────────────────────────────────────┐ │ │  │
-│  │ │         │ quarkus-oauth-playground-backend               │ │ │  │
-│  │ │         │ ┌────────────────────────────────────────────┐ │ │ │  │
-│  │ │         │ │ GET /secured                               │ │ │ │  │
-│  │ │         │ │    └──▶ Keycloak (OIDC token validation)   │ │ │ │  │
-│  │ │         │ └────────────────────────────────────────────┘ │ │ │  │
-│  │ │         └────────────────────────────────────────────────┘ │ │  │
-│  │ └────────────────────────────────────────────────────────────┘ │  │
-│  └────────────────────────────────────────────────────────────────┘  │
-│                                                                      │
-└──────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Viewing Traces
@@ -426,8 +379,8 @@ OpenShift ServiceMonitor will automatically scrape these endpoints when deployed
 
 ### Reactive Programming
 
-- **01-OIDC**: Uses Vert.x Mutiny WebClient for reactive HTTP calls
-- **02-Oauth2 Frontend**: Uses Quarkus REST Client (reactive) + Vert.x WebClient
+- **01-OIDC**: Uses Vert.x Mutiny WebClient + Qute templates for server-rendered UI
+- **02-Oauth2 Frontend**: Uses Vert.x Mutiny WebClient + Qute templates + REST Client for server-rendered UI
 - **02-Oauth2 Backend**: Uses OIDC bearer token authentication
 
 ### Automatic Trace Propagation
@@ -447,13 +400,17 @@ All Quarkus applications use the `io.jeannyil` package:
 quarkus/
 ├── 01-OIDC/
 │   └── src/main/java/io/jeannyil/
-│       └── OIDCProxyResource.java
+│       ├── OidcPlaygroundResource.java
+│       ├── KeycloakProxyService.java
+│       └── OidcSessionStore.java
 └── 02-Oauth2/
     ├── backend/src/main/java/io/jeannyil/
     │   └── OAuthServiceResource.java
     └── frontend/src/main/java/io/jeannyil/
+        ├── OAuthPlaygroundResource.java
+        ├── KeycloakProxyService.java
         ├── BackendServiceClient.java
-        └── OAuthProxyResource.java
+        └── OAuthSessionStore.java
 ```
 
 ---

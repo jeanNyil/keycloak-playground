@@ -1,0 +1,14 @@
+{#if error}
+<p class="error">{error}</p>
+{#else}
+{#if accessTokenHeader}
+Header
+<pre>{accessTokenHeader}</pre>
+Payload
+<pre>{accessTokenPayload}</pre>
+Signature
+<pre>{accessTokenSignature}</pre>
+Encoded
+<pre>{accessTokenEncoded}</pre>
+{/if}
+{/if}

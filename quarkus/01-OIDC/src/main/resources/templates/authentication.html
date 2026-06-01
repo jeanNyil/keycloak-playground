@@ -1,0 +1,34 @@
+<h2>Authentication</h2>
+<form hx-post="/auth/generate" hx-target="#auth-result" hx-swap="innerHTML"
+      hx-vals='js:{"redirectUri": window.location.origin + "/"}'>
+    <p>
+        <label>client_id</label>
+        <input name="clientId" value="{state.clientId ?: 'quarkus-oidc-playground'}"><br/>
+        <label>scope</label>
+        <input name="scope" value="{state.scope ?: 'openid'}"><br/>
+        <label>prompt</label>
+        <input name="prompt" value="{state.prompt ?: ''}"><br/>
+        <label>max_age</label>
+        <input name="maxAge" value="{state.maxAge ?: ''}"><br/>
+        <label>login_hint</label>
+        <input name="loginHint" value="{state.loginHint ?: ''}">
+    </p>
+    <p>
+        <button type="submit">Generate Authentication Request</button>
+    </p>
+</form>
+<hr/>
+
+<div id="auth-result">
+    {#if authUrl}
+    <h3>Authentication Request</h3>
+    <pre>{authRequestFormatted}</pre>
+    <a href="{authUrl}" class="btn-action">Send Authentication Request</a>
+    {/if}
+
+    {#if state.authError}
+    <h3>Authentication Response</h3>
+    <pre class="error">error={state.authError}
+error_description={state.authErrorDescription}</pre>
+    {/if}
+</div>

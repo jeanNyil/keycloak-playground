@@ -1,0 +1,16 @@
+<h2>Discovery</h2>
+<form hx-post="/discovery" hx-target="#discovery-result" hx-swap="innerHTML">
+    <p>
+        <label>Issuer</label>
+        <input name="issuer" value="{state.issuer ?: defaultIssuer}">
+    </p>
+    <p>
+        <button type="submit">
+            <span class="htmx-indicator">Loading...</span>
+            <span>Load OpenID Provider Configuration</span>
+        </button>
+    </p>
+</form>
+<hr/>
+<h3>OpenID Provider Configuration</h3>
+<pre id="discovery-result">{#if discoveryJson}{discoveryJson}{/if}</pre>

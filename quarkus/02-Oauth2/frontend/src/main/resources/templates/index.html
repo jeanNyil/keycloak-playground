@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OAuth 2.0 Playground (Quarkus)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {#bundle /}
+</head>
+<body>
+
+<h1>OAuth 2.0 Playground (Quarkus)</h1>
+
+<nav>
+    <button hx-get="/step/discovery" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'discovery'}active{/if}" data-step="discovery">
+        1 - Discovery
+    </button>
+    <button hx-get="/step/authorization" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'authorization'}active{/if}" data-step="authorization">
+        2 - Authorization
+    </button>
+    <button hx-get="/step/invoke" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'invoke'}active{/if}" data-step="invoke">
+        3 - Invoke Service
+    </button>
+    <form method="POST" action="/reset" style="display:inline"><button type="submit" class="btn-reset">Reset</button></form>
+    <form method="GET" action="/logout" style="display:inline"><button type="submit" class="btn-logout">Logout</button></form>
+</nav>
+
+<hr/>
+
+{#if message}
+<div class="alert" id="alert-banner">
+    <span>{message}</span>
+    <button onclick="document.getElementById('alert-banner').remove()" class="alert-close">&times;</button>
+</div>
+{/if}
+
+<div id="step-content">
+    {stepContent.raw}
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'step-content') {
+            var step = evt.detail.requestConfig.path.split('/step/')[1];
+            if (step) {
+                document.querySelectorAll('nav button[data-step]').forEach(function(btn) {
+                    btn.classList.toggle('active', btn.getAttribute('data-step') === step);
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

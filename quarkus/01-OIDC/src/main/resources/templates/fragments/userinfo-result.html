@@ -1,0 +1,13 @@
+{#if error}
+<p class="error">{error}</p>
+{#else}
+{#if userInfoRequestFormatted}
+<h3>UserInfo Request</h3>
+<pre>{userInfoRequestFormatted}</pre>
+{/if}
+
+{#if userInfoResponseJson}
+<h3>UserInfo Response</h3>
+<pre>{userInfoResponseJson}</pre>
+{/if}
+{/if}

@@ -1,0 +1,23 @@
+<h2>Invoke Service</h2>
+
+<h3>Public Endpoint</h3>
+<p>
+    <button hx-post="/service/public" hx-target="#public-result" hx-swap="innerHTML">
+        <span class="htmx-indicator">Invoking...</span>
+        <span>Invoke /public</span>
+    </button>
+    <span style="color: #666; font-size: 0.9em;">(no authentication required)</span>
+</p>
+<pre id="public-result">{#if state.lastPublicResponse}{state.lastPublicResponse}{/if}</pre>
+
+<hr/>
+
+<h3>Secured Endpoint</h3>
+<p>
+    <button hx-post="/service/secured" hx-target="#secured-result" hx-swap="innerHTML">
+        <span class="htmx-indicator">Invoking...</span>
+        <span>Invoke /secured</span>
+    </button>
+    <span style="color: #666; font-size: 0.9em;">(requires quarkus-oauth-backend:user role)</span>
+</p>
+<pre id="secured-result">{#if state.lastSecuredResponse}{state.lastSecuredResponse}{/if}</pre>

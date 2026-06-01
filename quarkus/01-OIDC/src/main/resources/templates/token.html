@@ -1,0 +1,19 @@
+<h2>Token</h2>
+<p>
+    <label>Authorization Code</label>
+    <input id="input-code" value="{state.authorizationCode ?: ''}" disabled>
+</p>
+<p>
+    <button hx-post="/token" hx-target="#token-result" hx-swap="innerHTML">
+        <span class="htmx-indicator">Exchanging...</span>
+        <span>Send Token Request</span>
+    </button>
+</p>
+<hr/>
+
+<div id="token-result">
+    {#if tokenResponseJson}
+    <h3>Token Response</h3>
+    <pre>{tokenResponseJson}</pre>
+    {/if}
+</div>

@@ -1,0 +1,7 @@
+{#if error}
+<p class="error">{error}</p>
+{#else}
+<h3>Authentication Request</h3>
+<pre>{authRequestFormatted}</pre>
+<a href="{authUrl}" class="btn-action">Send Authentication Request</a>
+{/if}

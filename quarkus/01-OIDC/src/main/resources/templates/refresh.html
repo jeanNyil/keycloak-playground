@@ -1,0 +1,15 @@
+<h2>Refresh</h2>
+<p>
+    <button hx-post="/refresh" hx-target="#refresh-result" hx-swap="innerHTML">
+        <span class="htmx-indicator">Refreshing...</span>
+        <span>Send Refresh Request</span>
+    </button>
+</p>
+<hr/>
+
+<div id="refresh-result">
+    {#if refreshResponseJson}
+    <h3>Refresh Response</h3>
+    <pre>{refreshResponseJson}</pre>
+    {/if}
+</div>

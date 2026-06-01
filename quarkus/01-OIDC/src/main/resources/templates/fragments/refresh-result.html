@@ -1,0 +1,18 @@
+{#if error}
+<p class="error">{error}</p>
+{#else}
+{#if refreshRequestFormatted}
+<h3>Refresh Request</h3>
+<pre>{refreshRequestFormatted}</pre>
+{/if}
+
+{#if refreshResponseJson}
+<h3>Refresh Response</h3>
+<pre>{refreshResponseJson}</pre>
+{/if}
+
+{#if idTokenRefreshed}
+<h3>ID Token</h3>
+<pre>{idTokenRefreshed}</pre>
+{/if}
+{/if}

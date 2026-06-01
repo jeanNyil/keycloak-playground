@@ -1,0 +1,23 @@
+{#if error}
+<p class="error">{error}</p>
+{#else}
+{#if tokenRequestFormatted}
+<h3>Token Request</h3>
+<pre>{tokenRequestFormatted}</pre>
+{/if}
+
+{#if tokenResponseJson}
+<h3>Token Response</h3>
+<pre>{tokenResponseJson}</pre>
+{/if}
+
+{#if idTokenHeader}
+<h3>ID Token</h3>
+Header
+<pre>{idTokenHeader}</pre>
+Payload
+<pre>{idTokenPayload}</pre>
+Signature
+<pre>{idTokenSignature}</pre>
+{/if}
+{/if}

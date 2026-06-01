@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenID Connect Playground (Quarkus)</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {#bundle /}
+</head>
+<body>
+
+<h1>OpenID Connect Playground (Quarkus)</h1>
+
+<nav>
+    <button hx-get="/step/discovery" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'discovery'}active{/if}" data-step="discovery">
+        1 - Discovery
+    </button>
+    <button hx-get="/step/authentication" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'authentication'}active{/if}" data-step="authentication">
+        2 - Authentication
+    </button>
+    <button hx-get="/step/token" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'token'}active{/if}" data-step="token">
+        3 - Token
+    </button>
+    <button hx-get="/step/refresh" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'refresh'}active{/if}" data-step="refresh">
+        4 - Refresh
+    </button>
+    <button hx-get="/step/userinfo" hx-target="#step-content" hx-swap="innerHTML"
+            class="{#if currentStep == 'userinfo'}active{/if}" data-step="userinfo">
+        5 - UserInfo
+    </button>
+    <form method="POST" action="/reset" style="display:inline"><button type="submit" class="btn-reset">Reset</button></form>
+    <form method="GET" action="/logout" style="display:inline"><button type="submit" class="btn-logout">Logout</button></form>
+</nav>
+
+<hr/>
+
+{#if message}
+<div class="alert" id="alert-banner">
+    <span>{message}</span>
+    <button onclick="document.getElementById('alert-banner').remove()" class="alert-close">&times;</button>
+</div>
+{/if}
+
+<div id="step-content">
+    {stepContent.raw}
+</div>
+
+<script>
+    document.body.addEventListener('htmx:afterSwap', function(evt) {
+        if (evt.detail.target.id === 'step-content') {
+            var step = evt.detail.requestConfig.path.split('/step/')[1];
+            if (step) {
+                document.querySelectorAll('nav button[data-step]').forEach(function(btn) {
+                    btn.classList.toggle('active', btn.getAttribute('data-step') === step);
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
