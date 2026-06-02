@@ -277,24 +277,18 @@ All Quarkus applications have built-in OpenTelemetry instrumentation with automa
 All Keycloak interactions use Vert.x WebClient with automatic trace propagation:
 
 ```
-┌──────────┐      ┌─────────────────────┐      ┌──────────────┐
-│          │      │                     │      │              │
-│  Browser │─────▶│  OIDC Frontend      │─────▶│   Keycloak   │
-│          │      │  (Quarkus + Vert.x  │      │   (OTel)     │
-│          │      │   WebClient)        │      │              │
-└──────────┘      └─────────────────────┘      └──────────────┘
-     │                     │                          │
-     │  HTMX requests      │   /.well-known/*         │
-     │  ─────────────────▶ │   /protocol/openid/*     │
-     │                     │   ──────────────────────▶│
-     │                     │                          │
-     └─────────────────────┴──────────────────────────┘
-                           │
-                           ▼
-              ┌─────────────────────────┐
-              │   OpenTelemetry         │
-              │   Collector             │
-              └─────────────────────────┘
+┌──────────┐      ┌──────────────────────────┐      ┌──────────────┐
+│          │      │  OIDC Frontend           │      │              │
+│  Browser │─────▶│  Quarkus + Qute          │─────▶│   Keycloak   │
+│          │◀─────│  (Vert.x WebClient)      │◀─────│              │
+│          │ HTML │                          │ JSON │              │
+└──────────┘      └──────────────────────────┘      └──────────────┘
+                            │
+                            ▼
+               ┌─────────────────────────┐
+               │   OpenTelemetry         │
+               │   Collector             │
+               └─────────────────────────┘
 ```
 
 #### OAuth Playground
