@@ -210,12 +210,12 @@ cd quarkus/02-Oauth2/frontend
 
 >**NOTE**: Both projects are configured to use a container runtime for native builds. See `quarkus.native.container-build=true` in `application.properties`. Adjust the `quarkus.native.native-image-xmx` value according to your container runtime available memory resources.
 
->**IMPORTANT**: Native image builds require SSL support for HTTPS calls to Keycloak. This is automatically enabled via `quarkus.ssl.native=true` in `application.properties` (adds `--enable-url-protocols=http,https` to the native-image build).
+>**IMPORTANT**: Native image builds require SSL support for HTTPS calls to Keycloak. The frontend enables this explicitly via `quarkus.ssl.native=true` in its `application.properties` (adds `--enable-url-protocols=http,https` to the native-image build). The backend gets SSL support automatically through the `quarkus-oidc` extension.
 
 You can then execute your native executables with:
 ```bash
-./target/quarkus-oauth-playground-backend-1.0.0-SNAPSHOT-runner   # Backend
-./target/quarkus-oauth-playground-frontend-1.0.0-SNAPSHOT-runner  # Frontend
+./target/quarkus-oauth-playground-backend-1.0.0-runner   # Backend
+./target/quarkus-oauth-playground-frontend-1.0.0-runner  # Frontend
 ```
 
 >**NOTE**: If you're on Apple Silicon and built the native images inside a Linux container (via `quarkus.native.container-build=true`), the results are Linux ELF binaries for ARM aarch64. macOS can't execute Linux binaries, so you'll get "exec format error". Build and run the container images instead, using `Dockerfile.native-micro` and `--platform linux/arm64` to match the binary architecture:

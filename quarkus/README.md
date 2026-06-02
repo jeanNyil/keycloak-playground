@@ -11,8 +11,8 @@ Cloud-native implementations of OIDC and OAuth 2.0 playgrounds using Quarkus fra
 
 A running Keycloak (or RHBK) instance and a configured realm. See the [root README](../README.md#-quick-start) for general setup and the individual project READMEs for client-specific details:
 
-- [OIDC Playground prerequisites](./01-OIDC/README.md)
-- [OAuth 2.0 Playground prerequisites](./02-Oauth2/README.md)
+- [OIDC Playground prerequisites](./01-OIDC/README.md#prerequisites)
+- [OAuth 2.0 Playground prerequisites](./02-Oauth2/README.md#prerequisites)
 
 ---
 
@@ -79,8 +79,8 @@ No need to manually run Docker containers!
 
 Native image compilation is supported for all Quarkus playgrounds. See each project's README for specific instructions:
 
-- [OIDC native build](./01-OIDC/README.md)
-- [OAuth 2.0 native build](./02-Oauth2/README.md)
+- [OIDC native build](./01-OIDC/README.md#building-native-images)
+- [OAuth 2.0 native build](./02-Oauth2/README.md#building-native-images)
 
 ---
 
@@ -308,21 +308,20 @@ Complete trace propagation across frontend, backend, and Keycloak:
 │          │      │  (Qute + Vert.x     │      │   (OIDC)     │
 │          │      │   WebClient)        │      │              │
 └──────────┘      └──────────┬──────────┘      └──────────────┘
-                             │                        ▲
-                             │                        │
-                             ▼                        │
-                  ┌─────────────────────┐             │
-                  │                     │  Token      │
-                  │  Quarkus Backend    │  Validation │
-                  │  (OIDC Service)     │─────────────┘
-                  │                     │
-                  └─────────────────────┘
-                             │
-                             ▼
-              ┌─────────────────────────┐
-              │   OpenTelemetry         │
-              │   Collector             │
-              └─────────────────────────┘
+                             │         │              ▲
+                             ▼         │              │
+                  ┌──────────────────┐ │              │
+                  │                  │ │   Token      │
+                  │  Quarkus Backend │ │   Validation │
+                  │  (OIDC Service)  │─┼──────────────┘
+                  │                  │ │
+                  └────────┬─────────┘ │
+                           │           │
+                           ▼           ▼
+                  ┌─────────────────────────┐
+                  │   OpenTelemetry         │
+                  │   Collector             │
+                  └─────────────────────────┘
 ```
 
 ### Viewing Traces
@@ -402,6 +401,7 @@ quarkus/
 │   └── src/main/java/io/jeannyil/
 │       ├── OidcPlaygroundResource.java
 │       ├── KeycloakProxyService.java
+│       ├── OidcFlowState.java
 │       └── OidcSessionStore.java
 └── 02-Oauth2/
     ├── backend/src/main/java/io/jeannyil/
@@ -410,6 +410,7 @@ quarkus/
         ├── OAuthPlaygroundResource.java
         ├── KeycloakProxyService.java
         ├── BackendServiceClient.java
+        ├── OAuthFlowState.java
         └── OAuthSessionStore.java
 ```
 

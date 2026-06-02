@@ -74,7 +74,7 @@ keycloak.issuer=https://your-keycloak-server/realms/your-realm
 ```bash
 cd quarkus/01-OIDC
 
-# Update application.properties with your Keycloak URL and issuer
+# Update application.properties with your Keycloak issuer
 # Run in dev mode
 ./mvnw quarkus:dev
 
@@ -127,7 +127,7 @@ Open the playground application at http://localhost:8080 (local dev) or `https:/
 
 >**IMPORTANT**: Native image builds require SSL support for HTTPS calls to Keycloak. This is automatically enabled via `quarkus.ssl.native=true` in `application.properties` (adds `--enable-url-protocols=http,https` to the native-image build).
 
-You can then execute your native executable with: `./target/quarkus-oidc-playground-1.0.0-SNAPSHOT-runner`
+You can then execute your native executable with: `./target/quarkus-oidc-playground-1.0.0-runner`
 
 >**NOTE**: If you're on Apple Silicon and built the native image inside a Linux container (via `quarkus.native.container-build=true`), the result is a Linux ELF binary for ARM aarch64. macOS can't execute Linux binaries, so you'll get "exec format error". Build and run the container image instead, using `Dockerfile.native-micro` and `--platform linux/arm64` to match the binary architecture:
 >
