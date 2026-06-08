@@ -27,9 +27,11 @@
   "protocol": "openid-connect",
   "attributes": {
     "realm_client": "false",
+    "logout.confirmation.enabled": "true",
     "oidc.ciba.grant.enabled": "false",
     "backchannel.logout.session.required": "true",
     "standard.token.exchange.enabled": "false",
+    "oauth2.jwt.authorization.grant.enabled": "false",
     "post.logout.redirect.uris": "+",
     "frontchannel.logout.session.required": "true",
     "oauth2.device.authorization.grant.enabled": "false",

@@ -27,9 +27,11 @@
   "protocol": "openid-connect",
   "attributes": {
     "realm_client": "false",
+    "logout.confirmation.enabled": "true",
     "oidc.ciba.grant.enabled": "false",
     "backchannel.logout.session.required": "true",
     "standard.token.exchange.enabled": "false",
+    "oauth2.jwt.authorization.grant.enabled": "false",
     "frontchannel.logout.session.required": "true",
     "post.logout.redirect.uris": "+",
     "display.on.consent.screen": "true",
@@ -49,11 +51,11 @@
     "email"
   ],
   "optionalClientScopes": [
-    "nodejs-oauth-backend:call",
     "address",
     "phone",
     "offline_access",
     "organization",
+    "nodejs-oauth-backend:call",
     "microprofile-jwt"
   ],
   "access": {
