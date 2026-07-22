@@ -14,5 +14,5 @@ metadata:
   name: quarkus-oauth-playground-backend-secret
 stringData:
   application.properties: |
-    quarkus.oidc.credentials.secret=your-client-secret-here
+    quarkus.oidc.credentials.secret=<YOUR_CLIENT_SECRET_HERE>
 type: Opaque
