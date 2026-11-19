@@ -84,6 +84,14 @@
       <version>2.3.4</version>
     </dependency>
 
+    <!-- HTMX library (consumed by Web Bundler at build time) -->
+    <dependency>
+      <groupId>org.mvnpm</groupId>
+      <artifactId>htmx.org</artifactId>
+      <version>2.0.10</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Reactive HTTP client for Keycloak proxy -->
     <dependency>
       <groupId>io.quarkus</groupId>
